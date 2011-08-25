@@ -1,0 +1,5 @@
+bin
+obj
+js
+tests
+.sconsign.dblite
