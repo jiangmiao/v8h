@@ -112,6 +112,7 @@ class Server
     Socket.autoCloseOnError @server
     rt = Socket.bindTcp @server, @address, @port, true
     if rt == -1
+      p $systemError
       Socket.close @server
       return
     Socket.listen @server, @backlog

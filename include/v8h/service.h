@@ -35,7 +35,7 @@ namespace v8h
 
 		void mod(int fd, int events)
 		{
-			epoll_event event;
+			epoll_event event = {0};
 			event.events  = events;
 			event.data.fd = fd;
 			epoll_ctl(this->fd, EPOLL_CTL_MOD, fd, &event);
@@ -43,7 +43,7 @@ namespace v8h
 
 		void add(int fd, int events)
 		{
-			epoll_event event;
+			epoll_event event = {0};
 			event.events  = events;
 			event.data.fd = fd;
 			epoll_ctl(this->fd, EPOLL_CTL_ADD, fd, &event);
@@ -52,7 +52,7 @@ namespace v8h
 
 		void del(int fd)
 		{
-			epoll_event event;
+			epoll_event event = {0};
 			epoll_ctl(this->fd, EPOLL_CTL_DEL, fd, &event);
 			--fds_number;
 		}
@@ -142,8 +142,10 @@ namespace v8h
 			auto fd        = TO_INT(args[0]);
 			auto fds       = GET_OBJ(self, V8H_SYM(fds));
 			auto fds_error = GET_OBJ(self, V8H_SYM(fds_error));
-			service->del(fd);
-			fds->Delete(fd);
+			if (fds->Has(fd)) {
+				service->del(fd);
+				fds->Delete(fd);
+			}
 			fds_error->Delete(fd);
 			return self;
 		}
@@ -311,6 +313,13 @@ namespace v8h
 		}
 
 
+		static V8H_FUNCTION(get_fds_number)
+		{
+			auto self = args.This();
+			auto epoll = get_internal(self);
+			return V8_INT(epoll->fds_number);
+		}
+
 		static Handle<Function> create()
 		{
 			V8H_CREATE_START_WITH_INTERNAL_FIELD();
@@ -330,6 +339,8 @@ namespace v8h
 			V8H_IMPLEMENT(trigger);
 			V8H_IMPLEMENT(trigger_by_event_id);
 			V8H_IMPLEMENT(get_callback_from_event_id);
+
+			V8H_IMPLEMENT(get_fds_number);
 
 			V8H_CREATE_END();
 		}

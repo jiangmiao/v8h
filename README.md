@@ -26,8 +26,25 @@ Quick build
 
 Performance
 ===========
-V8H use native epoll and communite with V8 directly, so it's very fast even fast than nginx.
-currently about 250% faster than nodejs for hello world test.
+
+    V8H use native epoll and communite with V8 directly, so it's very fast.
+    currently v8h is 200% faster than nodejs for hello world test.
+
+    in Intel ATOM 1.6 
+    $ siege -c 1 -t 3S
+    v8h    (1619.91 trans/s)
+    nginx  (1417.58 trans/s)
+    nodejs ( 935.42 trans/s)
+
+    $ siege -c 3 -t 3S
+    nginx  (2208.64 trans/s)
+    v8h    (1854.01 trans/s)
+    nodejs (1207.73 trans/s)
+
+    $ ab -c 50 -n 20000
+    nginx  (4588.30 reqs/s)
+    v8h    (4561.54 reqs/s)
+    nodejs (2090.68 reqs/s)
 
 Further Work
 ============

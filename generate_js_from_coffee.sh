@@ -19,7 +19,9 @@ do
   eval coffee -$cmd -o js/$name $name/*.coffee $watch
 done
 
-while :;
-do
-  sleep 60
-done
+if [ "$1" != "" ]; then
+  while :;
+  do
+    sleep 60
+  done
+fi
