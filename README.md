@@ -30,7 +30,15 @@ Performance
     V8H use native epoll and communite with V8 directly, so it's very fast.
     currently v8h is 200% faster than nodejs for hello world test.
 
-    in Intel ATOM 1.6 
+    v8h    : bin/v8h js/examples/http.js
+    nginx  : static file hello.txt with 12 bytes "hello world\0"
+    nodejs : the 'hello world' code grab from nodejs.org
+
+Server 1
+
+    CPU    : Intel(R) Atom(TM) CPU D510   @ 1.66GHz
+    System : ArchLinux 32bits
+
     $ siege -c 1 -t 3S
     v8h    (1619.91 trans/s)
     nginx  (1417.58 trans/s)
@@ -45,6 +53,27 @@ Performance
     nginx  (4588.30 reqs/s)
     v8h    (4561.54 reqs/s)
     nodejs (2090.68 reqs/s)
+
+Server 2
+
+    CPU    : AMD Phenom(tm) 9650 Quad-Core Processor
+    System : ArchLinux 64bits
+
+    $ siege -c 1 -t 3S
+    v8h    (10850.71 trans/s)
+    nginx  ( 9952.20 trans/s)
+    nodejs ( 5694.71 trans/s)
+
+    $ siege -c 8 -t 3S
+    nginx  (20083.93 trans/s)
+    v8h    (19897.75 trans/s)
+    nodejs ( 7826.81 transls)
+
+    $ ab -c 500 -n 50000 http://127.0.0.1:9090
+    v8h    (20450.32 reqs/s)
+    nginx  (19229.02 reqs/s)
+    nodejs ( 8222.89 reqs/s)
+
 
 Further Work
 ============
