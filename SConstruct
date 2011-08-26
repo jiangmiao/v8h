@@ -15,6 +15,16 @@ else:
 
 env.Append(LIBS = ['v8', 'pthread'])
 
-v8h_obj = env.Object('obj/v8h.o', "src/v8h.cc")
-env.Program('bin/v8h', v8h_obj)
+env.Program('bin/v8h', [
+  "src/v8h.cc",
+  "src/buffer.cc",
+  "src/algorithm.cc",
+  "src/service.cc",
+  "src/socket.cc",
+  "src/system.cc",
+  "src/error.cc",
+  "src/console.cc",
+  "src/config.cc",
+  "src/file.cc"
+])
 

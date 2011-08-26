@@ -1,8 +1,5 @@
-#ifndef V8H_ERROR_H
-#define V8H_ERROR_H
-
-
 #include <stdarg.h>
+#include "error.h"
 
 namespace v8h
 {
@@ -18,5 +15,3 @@ namespace v8h
 	}
 
 }
-
-#endif

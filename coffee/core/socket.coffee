@@ -51,6 +51,9 @@ Socket.extend
 
   readToken: (fd, buffer, deliBuffer, callback) ->
     deliBuffeSize = deliBuffer.size()
+    if deliBuffeSize == 0
+      callback 0
+      return
     last          = 0
     Socket.readUntil fd, buffer, ->
       last = buffer.partialFindBuffer(deliBuffer, last)

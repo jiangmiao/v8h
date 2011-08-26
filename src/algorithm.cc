@@ -1,14 +1,7 @@
-#ifndef V8H_ALGORITHM_H
-#define V8H_ALGORITHM_H
+#include "algorithm.h"
 
 namespace v8h
 {
-	template <class T> 
-	inline const T& min ( const T& a, const T& b ) 
-	{
-		return (a<b)?a:b;
-	}
-
 	int partial_find(const char *haystack_start, size_t haystack_size, const char *needle, size_t needle_size)
 	{
 		const char *haystack     = haystack_start;
@@ -35,7 +28,7 @@ namespace v8h
 	/**
 	 * Convert underline variable to lower camel
 	 */
-	inline const char* underline_to_camel(const char *src)
+	const char* underline_to_camel(const char *src)
 	{
 		static char js_name[512];
 		char *dest = js_name;
@@ -67,5 +60,3 @@ namespace v8h
 	}
 
 }
-
-#endif
