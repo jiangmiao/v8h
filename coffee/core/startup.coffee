@@ -50,12 +50,22 @@ global.extend
 
     (filename) ->
       if filename[0] == '/'
-        requireAbsolute(filename)
-      else if filename.substr(0,2) == './'
-        requireRelative(filename)
+        originalFileName = filename
       else
-        requireIncludePath(filename)
+        originalFileName = $currentDir + "?" + filename
+
+      if requiredFiles[originalFileName]?
+        return requiredFiles[originalFileName]
+
+      if filename[0] == '/'
+        exports = requireAbsolute(filename)
+      else if filename.substr(0,2) == './'
+        exports = requireRelative(filename)
+      else
+        exports = requireIncludePath(filename)
         # search in library path
+
+      requiredFiles[originalFileName] = exports
 
 
 

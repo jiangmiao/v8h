@@ -266,7 +266,7 @@ namespace v8h
 			size_t times     = 0;
 			size_t max_times = 0;
 			if (max_times == 0) {
-				max_times = 1e6;
+				max_times = 1e5;
 			}
 			while (service->fds_number) {
 				int n = service->wait(80);
