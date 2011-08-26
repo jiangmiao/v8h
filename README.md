@@ -1,7 +1,7 @@
 About V8H
 =========
 
-    V8H is a nodejs like system base on C++0x and V8 javascript Engine. 
+    V8H is a high performance nodejs like system base on C++0x and V8 javascript Engine. 
 
     Currently, V8H is only support Linux platform.
     Requirements:
@@ -28,7 +28,7 @@ Performance
 ===========
 
     V8H use native epoll and communite with V8 directly, so it's very fast.
-    currently v8h is 200% faster than nodejs for hello world test.
+    currently v8h is 100% faster than nodejs for hello world test.
 
     v8h    : bin/v8h js/examples/http.js
     nginx  : static file hello.txt with 12 bytes "hello world\0"
