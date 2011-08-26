@@ -262,6 +262,7 @@ namespace v8h
 			auto   config    = Config::global();
 			auto   service   = get_internal(self);
 			auto   fds       = GET_OBJ(self, V8H_SYM(fds));
+			auto   fds_error = GET_OBJ(self, V8H_SYM(fds_error));
 			size_t times     = 0;
 			size_t max_times = 0;
 			if (max_times == 0) {
@@ -278,7 +279,13 @@ namespace v8h
 					HandleScope scope;
 					for (int i=0; i<n; ++i) {
 						int  fd       = service->get_fd_by_event_id(i);
-						auto callback = Handle<Function>::Cast(fds->Get(fd));
+						int  events   = service->events[i].events;
+						Handle<Function> callback;
+						if (events & EPOLLERR || events & EPOLLHUP) {
+							callback = Handle<Function>::Cast(fds_error->Get(fd));
+						} else {
+							callback = Handle<Function>::Cast(fds->Get(fd));
+						}
 						auto result   = callback->Call(self, 0, NULL);
 						if (result.IsEmpty()) {
 							V8H_LEAVE(result);

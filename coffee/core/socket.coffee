@@ -95,6 +95,7 @@ Socket.extend
       Socket.writeUntilOnce fd, buffer, condition, callback
 
   writeBuffer: (fd, buffer, callback) ->
+    $out fd, ->
     n = Socket._writeBuffer fd, buffer
     size = buffer.size()
     if n == -1 && c.errno != c.EAGAIN || size == 0
@@ -115,7 +116,7 @@ Socket.extend
     buffer = $bufferPool.pop()
     buffer.writeUtf8(text)
     buffer.temporary = true
-    Socket.writeBuffer fd, buffer, callback, object
+    Socket.writeBuffer fd, buffer, callback
 
   connectUnix: (fd, address, callback) ->
     $out fd, ->
@@ -193,6 +194,12 @@ class Stream
   close: (path) ->
     $bufferPool.push @buffer
     Socket.close @fd
+
+  connectUnix: (path, callback) ->
+    Socket.connectUnix @fd, path, callback
+
+  connectTcp: (address, port, callback) ->
+    Socket.connectTcp @fd, address, port, callback
 
   @create: (fd, callback) ->
     stream = new Stream fd

@@ -210,7 +210,7 @@ namespace v8h
 			auto buffer        = Buffer::get_internal(buffer_object);
 			int n = 0;
 			while (buffer->size()) {
-				int n = send(fd, buffer->data(), buffer->size(), 0);
+				n = send(fd, buffer->data(), buffer->size(), 0);
 				if (n > 0) {
 					buffer->consume(n);
 					continue;
