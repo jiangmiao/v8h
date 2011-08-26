@@ -69,7 +69,7 @@ Server 2
     v8h    (19897.75 trans/s)
     nodejs ( 7826.81 transls)
 
-    $ ab -c 500 -n 50000 http://127.0.0.1:9090
+    $ ab -c 500 -n 50000
     v8h    (20450.32 reqs/s)
     nginx  (19229.02 reqs/s)
     nodejs ( 8222.89 reqs/s)
@@ -78,7 +78,7 @@ Server 2
 Further Work
 ============
 
-    1、Asychronous File I/O
+    1、Asynchronous File I/O
     2、Timer
     3、Full HTTP protocol implement
     4、Native Module Supported

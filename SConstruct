@@ -7,7 +7,7 @@ env = Environment(variables = vars)
 Help(vars.GenerateHelpText(env))
 
 mode = ARGUMENTS.get('mode', 'release')
-env.Append(CCFLAGS = '-std=c++0x -I./include')
+env.Append(CCFLAGS = '-std=c++0x')
 if (mode == 'release'):
   env.Append(CCFLAGS = '-O3 -DNDEBUG')
 else:
@@ -16,6 +16,5 @@ else:
 env.Append(LIBS = ['v8', 'pthread'])
 
 v8h_obj = env.Object('obj/v8h.o', "src/v8h.cc")
-Depends(v8h_obj, Glob("include/v8h/*.h"))
 env.Program('bin/v8h', v8h_obj)
 

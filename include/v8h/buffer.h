@@ -8,10 +8,9 @@ namespace v8h
 	    protected:
 		char   *data_;
 		size_t cursor_;
-		size_t reserve_;
-		size_t used_;
 		size_t size_;
-		bool   binded_;
+		size_t used_;
+		size_t reserve_;
 
 		void realloc(void *ptr, size_t size)
 		{
@@ -25,7 +24,6 @@ namespace v8h
 		: cursor_(0)
 		, size_(0)
 		, used_(0)
-		, binded_(false)
 		, reserve_(reserve)
 		{
 			data_ = (char*)malloc(reserve);

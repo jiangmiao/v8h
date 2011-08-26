@@ -8,7 +8,7 @@
 #include <libgen.h>
 
 
-#include <v8h/all.h>
+#include "../include/v8h/all.h"
 
 using namespace std;
 using namespace v8;
