@@ -4,6 +4,9 @@
 #include <v8.h>
 #include "algorithm.h"
 
+#define V8H_NS_START namespace v8h {
+#define V8H_NS_END }
+
 #define V8H_ENTER() HandleScope scope; \
 	auto self = args.This();
 
@@ -15,7 +18,7 @@
 #define V8H_RETURN_SELF() return self;
 #define V8H_RETURN_INT(arg) return Integer::New(arg);
 
-#define V8H_FUNCTION(name) Handle<Value> name(const Arguments &args)
+#define V8H_FUNCTION(name) v8::Handle<v8::Value> name(const v8::Arguments &args)
 #define V8H_LAMBDA [](const Arguments &args) -> Handle<Value>
 #define V8H_SETTER(name) Handle<Value> name(Local<String> property, Local<Value> value, const AccessorInfo &info)
 #define V8H_GETTER(name) Handle<Value> name(Local<String> property, const AccessorInfo &info)
@@ -40,7 +43,7 @@
 
 // Need Persistent Object hints to delete by manual.
 #define V8H_AUTO_DELETE(ptr) \
-	ptr->instance = Persistent<Object>::New(self);\
+	ptr->instance = v8::Persistent<v8::Object>::New(self);\
 	ptr->instance.MakeWeak(NULL, destructor);
 
 #define V8H_SYS_CHECK() \
@@ -48,39 +51,48 @@
 
 
 // Create function defination
+#define V8H_FUNCTION_CREATE() \
+	v8::Handle<v8::Function> create()
 #define V8H_CREATE_START() \
-	static Persistent<Function> function; \
+	static v8::Persistent<v8::Function> function; \
 	if (!function.IsEmpty()) \
 		return function; \
-	auto t = FunctionTemplate::New(constructor); \
+	auto t = v8::FunctionTemplate::New(constructor); \
 	auto o = t->InstanceTemplate(); \
 	auto c = t->GetFunction(); \
-	function = Persistent<Function>::New(c); \
+	function = v8::Persistent<v8::Function>::New(c); \
 	auto p = GET_OBJ(c, "prototype");
-	
+
+#define V8H_CREATE_OBJECT_START() \
+	static v8::Persistent<v8::Object> object; \
+	if (!object.IsEmpty()) \
+		return object; \
+	auto c = v8::Object::New(); \
+	object = v8::Persistent<v8::Object>::New(c); \
+
 #define V8H_CREATE_START_WITH_INTERNAL_FIELD() \
-	static Persistent<Function> function; \
+	static v8::Persistent<v8::Function> function; \
 	if (!function.IsEmpty()) \
 		return function; \
-	auto t = FunctionTemplate::New(constructor); \
+	auto t = v8::FunctionTemplate::New(constructor); \
 	auto o = t->InstanceTemplate(); \
 	o->SetInternalFieldCount(FIELDS_NUMBER); \
 	auto c = t->GetFunction(); \
-	function = Persistent<Function>::New(c); \
+	function = v8::Persistent<v8::Function>::New(c); \
 	auto p = GET_OBJ(c, "prototype");
 
 #define V8H_CREATE_END() \
 	return c;
 
-#define V8H_IMPLEMENT(name) SET(p, underline_to_camel(#name), name)
+#define V8H_IMPLEMENT(name) SET(p, #name, name)
 #define V8H_IMPLEMENT_ALIAS(name, alias) p->Set(String::NewSymbol(#name), FunctionTemplate::New(name)->GetFunction())
-#define V8H_STATIC_IMPLEMENT(name) SET(c, underline_to_camel(#name), name)
+#define V8H_STATIC_IMPLEMENT(name) SET(c, #name, name)
 #define V8H_C(name) SET(c, #name, name)
 #define V8H_I(name) V8H_IMPLEMENT(name)
 #define V8H_SI(name) V8H_STATIC_IMPLEMENT(name)
 
 // use for V8::AdjustAmountOfExternalAllocatedMemory, the minimize size adjusted.
-#define V8H_MEMORY_FIXED_SIZE 128
+#define V8H_MEMORY_FIXED_SIZE(object) (sizeof(object) + 128)
 
 #define V8H_PERSISTENT_OBJECT(name) \
 	Persistent<Object> name() \
@@ -89,7 +101,44 @@
 		return name; \
 	}
 
+// Arguments Hepler
+// ================
+#define V8H_ARG(idx, func, default) \
+	(argc > idx ? func(args[idx]) : default)
+
+
+#define V8H_MAP(name) \
+	SET(self, V8H_SYM(name), name)
+
+#define V8H_MAP_VALUE(name, value) \
+	SET(self, V8H_SYM(name), value)
+
+#define V8H_STR(name, string) \
+	v8::String::Utf8Value name##_value(string);
+
+#define V8H_STRLEN(name) \
+	name##_value.length()
+
+// Ensure
+// ======
+#define V8H_ENSURE(expression) \
+	if (!(expression)) \
+		return THROW_EXCEPTION(#expression);
+#define V8H_SYSTEM_ENSURE(expression) \
+	if (!(expression)) \
+		return THROW_SYSTEM_EXCEPTION(#expression);
+
+// Logger
+#ifdef V8H_NDEBUG
+# define V8H_DEBUG(...) ;
+#else
+# define V8H_DEBUG(...) fputs("[DEBUG] ", stderr);fprintf(stderr, __VA_ARGS__);fputs("\n", stderr);
+#endif
+
 #include "v8h_function.h"
 #include "v8h_import.h"
 #include "v8h_helper.h"
+
+// Uint32 MAX
+// ==========
 #endif

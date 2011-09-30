@@ -1,109 +1,75 @@
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <locale.h>
-#include <libgen.h>
+#include "buffer.h"
+#include "assert.h"
+#include "file.h"
+#include "system.h"
 
-
-#include "all.h"
-
-using namespace std;
-using namespace v8;
 using namespace v8h;
-
-char *get_bin_dir()
+using namespace v8;
+V8H_FUNCTION(puts)
 {
-	static char bin_dir[PATH_MAX];
-	char proc_path[PATH_MAX];
-	char bin_path[PATH_MAX];
-	snprintf(proc_path, sizeof(proc_path), "/proc/%d/exe", getpid());
-	readlink(proc_path, bin_path, sizeof(bin_path));
-	strcpy(bin_dir, dirname(bin_path));
-	return bin_dir;
-}
-
-char *get_module_file(char *dir, char *dir_end, const char *filename)
-{
-	static char path[PATH_MAX];
-	strcpy(dir_end, filename);
-	realpath(dir, path);
-	return path;
-}
-
-char *realpath(const char *filename)
-{
-	static char path[PATH_MAX];
-	realpath(filename, path);
-	return path;
-}
-
-
-int main(int argc, char *argv[])
-{
-	V8::SetFlagsFromCommandLine(&argc, argv, true);
-	if (argc == 1) {
-		puts("v8h [v8-options] script name");
-		return 1;
+	for (int i=0; i<args.Length(); ++i) {
+		v8::String::Utf8Value data(args[0]);
+		fwrite(*data, 1, data.length(), stdout);
 	}
-	setlocale(LC_ALL, "");
+	fwrite("\n", 1, 1, stdout);
+	fflush(stdout);
+	return v8::Undefined();
+}
+
+
+
+void dumpError(TryCatch &trycatch)
+{
+	auto message = trycatch.Message();
+	String::Utf8Value what(message->Get());
+	String::Utf8Value sourceLine(message->GetSourceLine());
+	String::Utf8Value scriptResourceName(message->GetScriptResourceName());
+	auto lineNumber = message->GetLineNumber();
+	auto columnNumber = message->GetStartColumn();
+	printf("Error: %s\n    at %s:%d:%d\n", *what, *scriptResourceName, lineNumber, columnNumber);
+
+}
+
+int main(int argc, char **argv)
+{
+	V8H_DEBUG("V8 version: %s", V8::GetVersion());
+	v8::V8::SetFlagsFromCommandLine(&argc, argv, true);
 	HandleScope scope;
 	auto context = Context::New();
-	Context::Scope context_scope(context);
-
+	Context::Scope contextScope(context);
 	auto global = context->Global();
-	v8h::System::init(global);
 
-	auto buffer     = v8h::Buffer::create();
-	auto tempBuffer = v8h::Buffer::global();
-	auto c = Object::New();
-	v8h::C::init(c);
+	SET(global, "Buffer", Buffer::create());
+	SET(global, "Assert", Assert::create());
+	SET(global, "File"  , File::create());
+	SET(global, "System", System::create());
+	SET(global, "puts"  , puts);
+	SET(global, "global", global);
+	SET(global, "absoluteRequire", System::absoluteRequire);
 
-	auto includePath = Array::New();
-
-
-	char *path = (char*)malloc(PATH_MAX);
-	char *dir = get_bin_dir();
-	char *dir_end = dir + strlen(dir);
-	strcpy(dir_end, "/../js");
-	if (realpath(dir, path)) {
-		SET(includePath, includePath->Length(), String::New(path));
-	}
-
-	getcwd(path, PATH_MAX);
-	SET(global , "$workingDir"  , String::New(path));
-	free(path);
-
-	auto v8_argv = Array::New();
+	auto ARGV = v8::Array::New();
 	for (int i=0; i<argc; ++i) {
-		SET(v8_argv, i, String::New(argv[i]));
+		ARGV->Set(i, String::New(argv[i]));
 	}
-
-	auto config = v8h::Console::global();
-	SET(global , "global"     , global);
-	SET(global , "$includePath", includePath);
-	SET(global , "c"          , c);
-	SET(global , "$argv"       , v8_argv);
-	SET(global , "$config"    , config);
-	SET(global , "service"    , v8h::Service::global());
-	SET(global , "console"    , v8h::Console::global());
-	SET(global , "Socket"     , v8h::Socket::create());
-	SET(global , "File"       , v8h::File::create());
-	SET(global , "Buffer"     , buffer);
-	SET(buffer , "temp"       , tempBuffer);
-	SET(global , "tempBuffer" , tempBuffer);
-
+	SET(global, "ARGV", ARGV);
 
 	TryCatch trycatch;
-	auto result = System::require(get_module_file(dir, dir_end, "/../js/core/startup.js"));
-	if (trycatch.HasCaught()) {
-		auto stack_trace = trycatch.StackTrace();
-		String::Utf8Value u(stack_trace);
-		puts(*u);
-		return 0;
+	 auto script = Script::New(String::New("(function(){var file = System.getBinDir()+'/../modules/core/startup.js'; var path = File.realpath(file); if (!path) throw new Error('cannot find startup file '+ file);System.absoluteRequire(path)}).call(this);"), String::New("core"));
+	if (script.IsEmpty()) {
+		dumpError(trycatch);
+	} else {
+		script->Run();
+		if (trycatch.HasCaught()) {
+			auto stackTrace = trycatch.StackTrace();
+			if (!stackTrace.IsEmpty()) {
+				String::Utf8Value info(stackTrace);
+				fputs(*info, stderr);
+				fputs("\n", stderr);
+			} else {
+				dumpError(trycatch);
+			}
+
+		}
 	}
 	return 0;
 }
-

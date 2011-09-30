@@ -2,20 +2,25 @@
 #define V8H_SYSTEM_H
 
 #include "v8h.h"
-namespace v8h
+#include "object.h"
+
+V8H_NS_START
+
+class System : public Object<System>
 {
-	class System
-	{
-	    public:
-		static const char *dirname(const char *filename);
-		static V8H_FUNCTION(forceGC);
-		static Handle<Value> require(const char *filename);
-		static V8H_FUNCTION(_require);
-		static V8H_GETTER(get_system_error);
-		static V8H_GETTER(get_system_errno);
-		static V8H_FUNCTION(puts);
-		static V8H_FUNCTION(print);
-		static Handle<Object> init(Handle<Object> c);
-	};
-}
+    public:
+	static V8H_FUNCTION(absoluteRequire);
+	static V8H_FUNCTION(startup);
+	static V8H_FUNCTION(getBinDir);
+	static V8H_FUNCTION(getWorkingDir);
+	static V8H_FUNCTION(getEnv);
+
+	static void dumpStackTrace();
+
+	static v8::Persistent<v8::Object> sources;
+	static v8::Handle<v8::Value> create();
+};
+
+V8H_NS_END
+
 #endif

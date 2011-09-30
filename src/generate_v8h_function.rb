@@ -14,7 +14,7 @@ for argc in (0..5)
       args = args.join(", ")
       str = <<EOT
 #define V8H_C_FUNCTION_#{argc}_#{has_return}(#{args}) \\
-	Handle<Value> name(const Arguments &args) \\
+	v8::Handle<v8::Value> name(const v8::Arguments &args) \\
 	{ \\
 		return ret_type(::name(#{args3})); \\
 	}
@@ -23,15 +23,15 @@ for argc in (0..5)
 	V8H_FUNCTION(name) \\
 	{ \\
 		auto self = args.This(); \\
-		auto instance = get_internal(self); \\
+		auto instance = getInternal(self); \\
 		return ret_type(instance->name(#{args3})); \\
 	}
 
-#define V8H_FORWARD_FUNCTION_WITH_CLASS_#{argc}_#{has_return}(klass, #{args}) \\
+#define V8H_FORWARD_#{argc}_#{has_return}(klass, #{args}) \\
 	V8H_FUNCTION(klass::name) \\
 	{ \\
 		auto self = args.This(); \\
-		auto instance = get_internal(self); \\
+		auto instance = getInternal(self); \\
 		return ret_type(instance->name(#{args3})); \\
 	}
 EOT
@@ -39,14 +39,14 @@ EOT
       args = args.join(", ")
       str = <<EOT
 #define V8H_C_FUNCTION_#{argc}_#{has_return}(#{args}) \\
-	Handle<Value> name(const Arguments &args) \\
+	V8H_FUNCTION(name) \\
 	{ \\
 		::name(#{args3}); \\
 		return args.This(); \\
 	}
 
 #define V8H_C_FUNCTION_#{argc}(#{args}) \\
-	Handle<Value> name(const Arguments &args) \\
+	V8H_FUNCTION(name) \\
 	{ \\
 		::name(#{args3}); \\
 		return args.This(); \\
@@ -56,26 +56,26 @@ EOT
 	V8H_FUNCTION(name) \\
 	{ \\
 		auto self = args.This(); \\
-		auto instance = get_internal(self); \\
+		auto instance = getInternal(self); \\
 		instance->name(#{args3}); \\
 		return self; \\
 	}
 
-#define V8H_FORWARD_FUNCTION_WITH_CLASS_#{argc}_#{has_return}(klass, #{args}) \\
+#define V8H_FORWARD_#{argc}_#{has_return}(klass, #{args}) \\
 	V8H_FUNCTION(klass::name) \\
 	{ \\
 		auto self = args.This(); \\
-		auto instance = get_internal(self); \\
+		auto instance = getInternal(self); \\
 		instance->name(#{args3}); \\
 		return self; \\
 	}
 
 
-#define V8H_FORWARD_FUNCTION_WITH_CLASS_#{argc}(klass, #{args}) \\
+#define V8H_FORWARD_#{argc}(klass, #{args}) \\
 	V8H_FUNCTION(klass::name) \\
 	{ \\
 		auto self = args.This(); \\
-		auto instance = get_internal(self); \\
+		auto instance = getInternal(self); \\
 		instance->name(#{args3}); \\
 		return self; \\
 	}

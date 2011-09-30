@@ -4,3 +4,4 @@ js
 tests
 .sconsign.dblite
 *.o
+*.swp

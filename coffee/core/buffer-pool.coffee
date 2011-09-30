@@ -26,12 +26,7 @@ class BufferPool
       @buffers.pop()
 
 
-global.$bufferPool = new BufferPool(100)
-
-v8h.extend Buffer,
-  isFound: (last, delim_buffer_size) ->
-    # assert delim_buffer_size > 0 so ignore @size() == 0 && delim_buffer_size == 0
-    last + delim_buffer_size <= @size()
+$bufferPool = new BufferPool(100)
 
 v8h.extend Buffer,
   pop: ->

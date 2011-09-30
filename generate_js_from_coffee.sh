@@ -11,7 +11,7 @@ fi
 
 for name in core net
 do
-  eval coffee -$cmd -o js/$name coffee/$name/*.coffee $watch
+  eval coffee -$cmd -o modules/$name coffee/$name/*.coffee $watch
 done
 
 for name in benchmark examples

@@ -3,162 +3,136 @@
 
 #include <v8.h>
 #include "v8h.h"
-namespace v8h 
+#include "object.h"
+#include "internal.h"
+
+V8H_NS_START
+
+class Buffer :  public Object<Buffer>, public Internal<Buffer>
 {
-	using namespace v8;
-	class Buffer
-	{
-	    protected:
-		char   *data_;
-		size_t cursor_;
-		size_t size_;
-		size_t used_;
-		size_t reserve_;
-		void realloc(void *ptr, size_t size);
-	    public:
-		Persistent<Object> instance;
-		Buffer(size_t reserve = 1024);
-		~Buffer();
-		char *data();
+    protected:
+	char     *memory_;
+	uint32_t cursor_;
+	uint32_t size_;
+	uint32_t reserve_;
+    public:
+	Buffer(uint32_t reserve = 1024);
+	~Buffer();
 
-		void consume(size_t n);
-		char *prepare(size_t n);
-		void commit(size_t n);
+	// Data Control
+	// ============
+	char * data();
+	void   zero();
+	void   clear();
 
-		size_t size();
-		size_t remain();
-		size_t reserve();
+	char * prepare(uint32_t n);
+	void   consume(uint32_t n);
+	void   commit(uint32_t n);
 
-		void zero();
-		void clear();
-		void sweep();
+	// Size Getter
+	// ===========
+	uint32_t size    ( ) const;
+	uint32_t remain  ( ) const;
+	uint32_t used    ( ) const;
+	uint32_t reserve ( ) const;
 
-		void show();
+	// Writer
+	// ======
+	void write(const char *data);
+	void write(const void *data, uint32_t size);
+	void write(v8::Handle<v8::Value> data);
+	void write(Buffer *buffer, uint32_t size = UINT32_MAX);
+	void writeInt32(int32_t data);
+	void writeUint32(uint32_t data);
+	void writeInt64(int64_t data);
+	void writeDouble(double data);
 
-		void write(const void *data, size_t n);
-		void write(const char *data);
-		void write(Handle<Value> data);
-		void write(Buffer *buffer, size_t n = (size_t)-1);
-		void write_int32(int32_t data);
-		void write_uint32(uint32_t data);
-		void write_int64(int64_t data);
-		void write_double(double data);
+	// Reader
+	// ======
+	void     read(void *dest, uint32_t size);
+	void     readBuffer(Buffer *buffer, uint32_t size);
+	int32_t  readInt32();
+	uint32_t readUint32();
+	int64_t  readInt64();
+	double   readDouble();
 
-		void read(void *dest, size_t size);
-		double read_double();
-		uint32_t read_uint32();
-		int32_t read_int32();
-		int64_t read_int64();
-		/**
-		 * Find dest buffer in the buffer.
-		 * 
-		 * \param target_buffer
-		 * \param offset 
-		 * \return the new offset of the buffer
-		 * new offset + target_buffer->size() <= buffer->size() : the pattern is met.
-		 * else find the string with new offset
-		 */
-		int partial_find(Buffer *needle, size_t offset);
-		typedef Buffer* InternalPointer;
-	    public:
-		enum {
-			FIELD_INTERNAL,
-			FIELDS_NUMBER
-		};
-		static V8H_FUNCTION(commit);
-		static V8H_FUNCTION(consume);
-		static V8H_FUNCTION(size);
-		static V8H_FUNCTION(reserve);
-		static V8H_FUNCTION(remain);
-		static V8H_FUNCTION(prepare);
-		static V8H_FUNCTION(data);
-		static V8H_FUNCTION(show);
-		static V8H_FUNCTION(clear);
-		static V8H_FUNCTION(zero);
+	// Peeker
+	// ======
+	void     peek(void *dest, uint32_t size);
+	void     peekBuffer(Buffer *buffer, uint32_t size);
+	int32_t  peekInt32();
+	uint32_t peekUint32();
+	int64_t  peekInt64();
+	double   peekDouble();
 
-		static V8H_FUNCTION(write_uint32);
-		static V8H_FUNCTION(write_int32);
-		static V8H_FUNCTION(write_int64);
-		static V8H_FUNCTION(write_double);
+	// Utils
+	uint32_t partialFind(Buffer *needle, uint32_t offset);
+	void     show();
+    public:
+	// Data Control
+	// ===========
+	static V8H_FUNCTION(data);
+	static V8H_FUNCTION(zero);
 
-		static V8H_FUNCTION(read_int32);
-		static V8H_FUNCTION(read_uint32);
-		static V8H_FUNCTION(read_int64);
-		static V8H_FUNCTION(read_double);
+	static V8H_FUNCTION(prepare);
+	static V8H_FUNCTION(commit);
+	static V8H_FUNCTION(consume);
+	static V8H_FUNCTION(clear);
 
-		static V8H_FUNCTION(_peek_buffer);
-		/**
-		 * read and don't remove the data from the buffer
-		 *
-		 * \param number of bytes will be read default is the whole buffer
-		 *
-		 * \return the utf8 string
-		 */
-		static V8H_FUNCTION(peek_utf8);
-		/**
-		 * read data to another buffer
-		 *
-		 * \param dest buffer
-		 * \param size
-		 */
-		static V8H_FUNCTION(_read_buffer);
-		/**
-		 * read the data and remove from the buffer
-		 * 
-		 * \param number of the bytes will be read, default is the whole buffer
-		 * \return the utf8 string
-		 */
-		static V8H_FUNCTION(read_utf8);
-		/**
-		 * Write UTF8 string
-		 *
-		 * \param the utf8 string
-		 * \return self
-		 */
-		static V8H_FUNCTION(write_utf8);
-		/**
-		 * Write UCS2 string
-		 * \param the ucs2 string
-		 * \return self
-		 */
-		static V8H_FUNCTION(write_ucs2);
-		/**
-		 * Write ASCII string
-		 *
-		 * \param ascii string
-		 * \return self
-		 */
-		static V8H_FUNCTION(write_ascii);
-		/**
-		 * Write Buffer
-		 *
-		 * \param buffer
-		 * \return self
-		 */
-		static V8H_FUNCTION(write_buffer);
-		/**
-		 * delete the buffer
-		 */
 
-		static V8H_FUNCTION(close);
-		/**
-		 * partial find buffer
-		 * 
-		 * \param the dest buffer will be matched
-		 * \param the start offset (from 0) to current buffer
-		 * 
-		 * \return the position of partial find
-		 *   found     :pos + dest.size() <= buffer.size()
-		 *   not found :pos + dest.size() > buffer.size()
-		 */
-		static V8H_FUNCTION(partial_find_buffer);
-		static V8H_FUNCTION(constructor);
-		static Handle<Function> create();
+	// Size Getter
+	// ===========
+	static V8H_FUNCTION(size);
+	static V8H_FUNCTION(remain);
+	static V8H_FUNCTION(used);
+	static V8H_FUNCTION(reserve);
 
-		static V8H_DECLARE_GET_INTERNAL();
-		static V8H_DECLARE_DESTRUCTOR();
-		static V8H_DECLARE_NEW_INSTANCE();
-		static V8H_DECLARE_GLOBAL();
-	};
-}
+	// Writer
+	// ======
+	static V8H_FUNCTION(writeBuffer);
+	static V8H_FUNCTION(writeUtf8);
+	static V8H_FUNCTION(writeInt32);
+	static V8H_FUNCTION(writeUint32);
+	static V8H_FUNCTION(writeInt64);
+	static V8H_FUNCTION(writeDouble);
+
+	// Reader
+	// ======
+	static V8H_FUNCTION(readBuffer);
+	static V8H_FUNCTION(readUtf8);
+	static V8H_FUNCTION(readInt32);
+	static V8H_FUNCTION(readUint32);
+	static V8H_FUNCTION(readInt64);
+	static V8H_FUNCTION(readDouble);
+
+	// Peeker
+	// ======
+	static V8H_FUNCTION(peekBuffer);
+	static V8H_FUNCTION(peekUtf8);
+	static V8H_FUNCTION(peekInt32);
+	static V8H_FUNCTION(peekUint32);
+	static V8H_FUNCTION(peekInt64);
+	static V8H_FUNCTION(peekDouble);
+
+	// Utils
+	// =====
+	static V8H_FUNCTION(partialFind);
+	static V8H_FUNCTION(show);
+
+	// Construtor
+	// ==========
+	static V8H_FUNCTION(constructor);
+	static v8::Handle<v8::Function> create();
+};
+V8H_NS_END
+
+/*
+ struct {
+	 uint32_t cursor_;
+	 uint32_t size_;
+ } backup;
+ void save();
+ void restore();
+
+ */
 #endif

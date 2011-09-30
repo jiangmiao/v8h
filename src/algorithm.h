@@ -1,6 +1,7 @@
 #ifndef V8H_ALGORITHM_H
 #define V8H_ALGORITHM_H
 
+#include <stdint.h>
 #include <string.h>
 
 namespace v8h
@@ -11,7 +12,7 @@ namespace v8h
 		return (a<b)?a:b;
 	}
 
-	int partial_find(const char *haystack_start, size_t haystack_size, const char *needle, size_t needle_size);
+	uint32_t partial_find(const char *haystack_start, size_t haystack_size, const char *needle, size_t needle_size);
 
 	/**
 	 * Convert underline variable to lower camel

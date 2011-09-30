@@ -2,7 +2,7 @@
 
 namespace v8h
 {
-	int partial_find(const char *haystack_start, size_t haystack_size, const char *needle, size_t needle_size)
+	uint32_t partial_find(const char *haystack_start, size_t haystack_size, const char *needle, size_t needle_size)
 	{
 		const char *haystack     = haystack_start;
 		const char *haystack_end = haystack + haystack_size;

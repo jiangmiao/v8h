@@ -1,87 +1,53 @@
-Object::extend = (object)->
-  for k, v of object
-    if object.hasOwnProperty(k)
-      @[k] = v
+do ->
+  File.join = ->
+    Array::join.call arguments, '/'
 
-Object::eval = (callback) ->
-  callback.call @
+  # Require
+  requiredFiles = {}
+  global.requiredFiles = requiredFiles
+  global.require = (file) ->
+    hint = "#{requireDir}?#{file}"
+    if requiredFiles[hint]?
+      return requiredFiles[hint]
 
-File.join = ->
-  ([].slice.call arguments, 0).join("/")
+    if file[0] == '.' and file[1] == '/'
+      path = File.join requireDir, file
+      path = File.realpath path
+      # relative
+    else if file[0] == '/'
+      # absolute
+      path = File.realpath file
+    else
+      # search in module path
+      path = false
 
-# require
-global.extend
-  require: do ->
-    requiredFiles = {}
+    if !path
+      throw new Error("require: cannot find file #{file}")
+    if requiredFiles[path]
+      requiredFiles[hint] = requiredFiles[path]
+      return requiredFiles[hint]
+    exports = System.absoluteRequire path
+    requiredFiles[hint] = requiredFiles[path] = exports
+    exports
 
-    requireAbsolute = (filename)->
-      realPath = File.realpath filename
-      unless realPath?
-        throw new Error "require: cannot find file #{filename}"
-      filename = realPath
+  require './v8h.js'
+  require './buffer.js'
 
-      if requiredFiles[filename]?
-        if requiredFiles[filename] == 1
-          throw new Error "require: loop require #{filename}"
-        return requiredFiles[filename]
+  if ARGV[1]?
+    script = ARGV[1].toString()
+    if script[0] == '/'
+      require ARGV[1]
+    else
+      require File.join System.getWorkingDir(), ARGV[1]
+  else
+    puts "usage: v8h script"
 
-      # mark the file is in requiring
-      requiredFiles[filename] = 1
-      exports                 = _require(filename)
-
-      # cache the exports
-      requiredFiles[filename] = exports
-      exports
-
-    requireRelative = (filename)->
-      requireAbsolute File.join $currentDir, filename
-
-    requireIncludePath = (filename)->
-      found = false
-      for dir in $includePath
-        path = File.join(dir, filename)
-        if File.exists path
-          filename = path
-          found = true
-          break
-      unless found
-        throw new Error "require: cannot find file #{filename}"
-      requireAbsolute(filename)
-
-    (filename) ->
-      if filename[0] == '/'
-        originalFileName = filename
-      else
-        originalFileName = $currentDir + "?" + filename
-
-      if requiredFiles[originalFileName]?
-        return requiredFiles[originalFileName]
-
-      if filename[0] == '/'
-        exports = requireAbsolute(filename)
-      else if filename.substr(0,2) == './'
-        exports = requireRelative(filename)
-      else
-        exports = requireIncludePath(filename)
-        # search in library path
-
-      requiredFiles[originalFileName] = exports
-
-
-
-  p: ->
-    puts.apply console, arguments
-
-require './logger.js'
-require './buffer.js'
-require './service.js'
-require './console.js'
-require './socket.js'
-
+###
 scriptFile = $argv[1]
 if scriptFile[0] == '/'
   require script
 else
-  require $workingDir + '/' + scriptFile
+  require __DIR__ + '/' + scriptFile
 
 $run()
+###
