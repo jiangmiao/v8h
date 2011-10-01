@@ -115,6 +115,8 @@ void System::dumpStackTrace()
 			fputs("Assert Error: \n\n", stderr);
 			auto lines = v8::Handle<v8::Array>::Cast(source);
 			int startLine = lineNumber - 10;
+			if (startLine < 0) 
+				startLine = 0;
 			for (int i=startLine; i<lineNumber; ++i) {
 				if (i == lineNumber - 1) 
 					fputs("\033[31m", stderr);

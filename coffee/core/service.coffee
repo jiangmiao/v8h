@@ -1,3 +1,5 @@
+service = new Service()
+
 $in = (fd, callback)->
   service.in fd, callback
 
@@ -11,15 +13,11 @@ $error = (fd, callback) ->
   service.error fd, callback
 
 $triggerError = (fd) ->
-  callback = service.fds_error[fd]
+  callback = service.fdsError[fd]
   unless callback?
     throw new Error "missing error callback"
   callback()
   
-
-$close = (fd)->
-  service.del fd
-  Socket.close fd
 
 $run = ->
   service.run.apply service, arguments
@@ -40,13 +38,16 @@ $runJS = ->
 
   @
 
-global.extend
+v8h.extend global,
   $in           : $in
   $out          : $out
   $del          : $del
   $error        : $error
-  $triggerError : $triggerError
-  $close        : $close
   $run          : $run
+  $triggerError : $triggerError
+
+###
+  $close        : $close
   $runJS        : $runJS
+###
 

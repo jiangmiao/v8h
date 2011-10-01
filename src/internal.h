@@ -26,6 +26,12 @@ class Internal
 		return (T*)GET_PTR(object, FIELD_INTERNAL);
 	}
 
+	template<typename S>
+	static T * getInternal(v8::Handle<S> value)
+	{
+		return getInternal(value->ToObject());
+	}
+
 	static void destructor(v8::Persistent<v8::Value> value, void *data)
 	{
 		auto object = value->ToObject();

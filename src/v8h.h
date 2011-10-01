@@ -26,16 +26,16 @@
 
 #define V8H_INT_ARG(idx) args[idx]->Int32Value()
 
-#define V8H_DEF_SYM(name) Persistent<String> name##_sym
-#define V8H_SET_SYM(name) name##_sym = Persistent<String>::New(String::NewSymbol(#name))
+#define V8H_DEF_SYM(name) v8::Persistent<v8::String> name##_sym
+#define V8H_SET_SYM(name) name##_sym = v8::Persistent<v8::String>::New(v8::String::NewSymbol(#name))
 #define V8H_GET_SYM(name) name##_sym
 #define V8H_SYM(name) name##_sym
 
 #define V8H_DEF_PER(type, name) Persistent<type> name
 #define V8H_SET_PER(type, name, value) name = Persistent<type>(type::New(value))
 
-#define V8H_CONSTANT_INT(name) c->Set(String::NewSymbol(#name), Integer::New(name))
-#define V8H_CONSTANT_PTR(name) c->Set(String::NewSymbol(#name), External::Wrap(name))
+#define V8H_CONSTANT_INT(name) c->Set(v8::String::NewSymbol(#name), v8::Integer::New(name))
+#define V8H_CONSTANT_PTR(name) c->Set(v8::String::NewSymbol(#name), v8::External::Wrap(name))
 
 // Auto Delete object
 #define V8H_DESTRUCTOR() \
@@ -126,6 +126,12 @@
 		return THROW_EXCEPTION(#expression);
 #define V8H_SYSTEM_ENSURE(expression) \
 	if (!(expression)) \
+		return THROW_SYSTEM_EXCEPTION(#expression);
+#define V8H_THROW(expression) \
+	if (expression) \
+		return THROW_EXCEPTION(#expression);
+#define V8H_SYSTEM_THROW(expression) \
+	if (expression) \
 		return THROW_SYSTEM_EXCEPTION(#expression);
 
 // Logger

@@ -29,6 +29,8 @@ env.Program('bin/v8h', [
   "src/algorithm.cc",
 	"src/assert.cc",
 	"src/file.cc",
-  "src/system.cc"
+  "src/system.cc",
+  "src/service.cc",
+  "src/socket.cc"
 ])
 

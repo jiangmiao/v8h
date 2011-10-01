@@ -2,6 +2,8 @@
 #include "assert.h"
 #include "file.h"
 #include "system.h"
+#include "service.h"
+#include "socket.h"
 
 using namespace v8h;
 using namespace v8;
@@ -26,7 +28,7 @@ void dumpError(TryCatch &trycatch)
 	String::Utf8Value scriptResourceName(message->GetScriptResourceName());
 	auto lineNumber = message->GetLineNumber();
 	auto columnNumber = message->GetStartColumn();
-	printf("Error: %s\n    at %s:%d:%d\n", *what, *scriptResourceName, lineNumber, columnNumber);
+	fprintf(stderr, "Error: %s\n    at %s:%d:%d\n", *what, *scriptResourceName, lineNumber, columnNumber);
 
 }
 
@@ -39,13 +41,18 @@ int main(int argc, char **argv)
 	Context::Scope contextScope(context);
 	auto global = context->Global();
 
+	auto Internal = v8::Object::New();
+	SET(global, "Internal", Internal);
 	SET(global, "Buffer", Buffer::create());
 	SET(global, "Assert", Assert::create());
 	SET(global, "File"  , File::create());
 	SET(global, "System", System::create());
+	SET(global, "Service", Service::create());
 	SET(global, "puts"  , puts);
 	SET(global, "global", global);
 	SET(global, "absoluteRequire", System::absoluteRequire);
+
+	SET(Internal, "Socket" , Socket::create());
 
 	auto ARGV = v8::Array::New();
 	for (int i=0; i<argc; ++i) {

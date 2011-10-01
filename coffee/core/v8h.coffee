@@ -8,4 +8,7 @@ class v8h
           dest[k] = v
     dest
 
+  @arrayEqual = (left, right)->
+    not (left < right || left > right)
+
 global.v8h = v8h

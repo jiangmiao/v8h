@@ -51,3 +51,14 @@ v8h.extend Buffer,
 
   slots: (n)->
     $bufferPool.resize(n)
+
+  clone: (src) ->
+    dest = Buffer.pop()
+    dest.writeBuffer src
+    dest
+
+Buffer::clone = ->
+  dest = Buffer.pop()
+  dest.writeBuffer @
+  dest
+

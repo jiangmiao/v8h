@@ -2,117 +2,51 @@
 #define V8H_SERVICE_H
 #include <unistd.h>
 #include <sys/epoll.h>
-#include <v8.h>
 #include "v8h.h"
+#include "object.h"
+#include "internal.h"
 
 V8H_NS_START
-class Service
+class Service : public Object<Service>, public Internal<Service>
 {
     protected:
 	epoll_event *events;
-	size_t      max_events;
+	uint32_t      maxEvents;
 	int         fd;
-	int         fds_number;
+	int         fdsNumber;
     public:
-	Service(size_t max_events);
+	Service(uint32_t maxEvents);
 	virtual ~Service();
 	void mod(int fd, int events);
 	void add(int fd, int events);
 	void del(int fd);
 	int wait(int timeout) ;
-	int get_fd_by_event_id(int event_id);
+	int getFdByEventId(int eventId);
 	typedef Service* InternalPointer;
     protected:
-	static Handle<Value> in_or_out(const Arguments &args, int events);
+	static v8::Handle<v8::Value> inOrOut(const v8::Arguments &args, int events);
     public:
 	static V8H_DEF_SYM(fds);
-	static V8H_DEF_SYM(fds_error);
+	static V8H_DEF_SYM(fdsError);
 	static V8H_DEF_SYM(event);
 	static V8H_DEF_SYM(fd);
-	enum {
-		FIELD_INTERNAL,
-		FIELDS_NUMBER
-	};
-	/**
-	 * Set poll in callback for fd
-	 *
-	 * \param fd
-	 * \param callback
-	 *
-	 * \return self
-	 */
-	static V8H_FUNCTION(in);
-	/**
-	 * Set poll out callback for fd
-	 *
-	 * \param fd
-	 * \param callback
-	 *
-	 * \return self
-	 */
-	static V8H_FUNCTION(out);
-	/**
-	 * delete fds_error and fds callback
-	 *
-	 * \param fd
-	 * \return self
-	 */
-	static V8H_FUNCTION(del);
-	/**
-	 * Set error trigger
-	 *
-	 * \param fd
-	 * \param callback
-	 *
-	 * \return self
-	 */
-	static V8H_FUNCTION(error);
-	/**
-	 * Wait epoll events
-	 *
-	 * \param int timeout in millions, default value is -1, wait forever.
-	 *
-	 * \return the number of events
-	 */
-	static V8H_FUNCTION(wait);
-	/**
-	 * delete the service
-	 */
-	static V8H_FUNCTION(close);
-	/**
-	 * Get callback from event id
-	 *
-	 * \param event id
-	 *
-	 * \return the callback relate to the event id
-	 */
-	static V8H_FUNCTION(get_callback_from_event_id);
-	/**
-	 * Trigger a callback by the fd id
-	 *
-	 * \param fd id
-	 *
-	 * \return the same as callback returns
-	 */
-	static V8H_FUNCTION(trigger);
-	/**
-	 * Trigger a callback by the event id
-	 *
-	 * \param event id
-	 *
-	 * \return the same as callback returns
-	 */
-	static V8H_FUNCTION(trigger_by_event_id);
-	/**
-	 */
-	static V8H_FUNCTION(run);
-	static V8H_FUNCTION(constructor);
-	static V8H_FUNCTION(get_fds_number);
-	static Handle<Function> create();
 
-	static V8H_DECLARE_GLOBAL();
-	static V8H_DECLARE_GET_INTERNAL();
-	static V8H_DECLARE_NEW_INSTANCE();
+	static V8H_FUNCTION(in);
+	static V8H_FUNCTION(out);
+	static V8H_FUNCTION(error);
+	static V8H_FUNCTION(del);
+
+	static V8H_FUNCTION(wait);
+	static V8H_FUNCTION(run);
+	static V8H_FUNCTION(close);
+
+	static V8H_FUNCTION(trigger);
+	static V8H_FUNCTION(triggerByEventId);
+
+	static V8H_FUNCTION(getFdsNumber);
+	static V8H_FUNCTION(getCallbackFromEventId);
+	static V8H_FUNCTION(constructor);
+	static v8::Handle<v8::Function> create();
 };
 V8H_NS_END
 #endif

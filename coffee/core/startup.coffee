@@ -32,6 +32,8 @@ do ->
 
   require './v8h.js'
   require './buffer.js'
+  require './service.js'
+  require './socket.js'
 
   if ARGV[1]?
     script = ARGV[1].toString()
@@ -39,6 +41,8 @@ do ->
       require ARGV[1]
     else
       require File.join System.getWorkingDir(), ARGV[1]
+
+    $run()
   else
     puts "usage: v8h script"
 

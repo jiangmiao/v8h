@@ -19,6 +19,12 @@ for argc in (0..5)
 		return ret_type(::name(#{args3})); \\
 	}
 
+#define V8H_C_#{argc}_#{has_return}(klass, #{args}) \\
+	V8H_FUNCTION(klass::name) \\
+	{ \\
+		return ret_type(::name(#{args3})); \\
+	}
+
 #define V8H_FORWARD_FUNCTION_#{argc}_#{has_return}(#{args}) \\
 	V8H_FUNCTION(name) \\
 	{ \\
@@ -50,6 +56,13 @@ EOT
 	{ \\
 		::name(#{args3}); \\
 		return args.This(); \\
+	}
+
+#define V8H_C_#{argc}_#{has_return}(klass, #{args}) \\
+	V8H_FUNCTION(klass::name) \\
+	{ \\
+		::name(#{args3}); \\
+		return v8::Undefined(); \\
 	}
 
 #define V8H_FORWARD_FUNCTION_#{argc}(#{args}) \\

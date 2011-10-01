@@ -14,7 +14,7 @@ do
   eval coffee -$cmd -o modules/$name coffee/$name/*.coffee $watch
 done
 
-for name in benchmark examples
+for name in benchmark examples test
 do
   eval coffee -$cmd -o js/$name $name/*.coffee $watch
 done

@@ -174,6 +174,12 @@ inline double TO_DOUBLE(v8::Handle<T> object)
 }
 
 template<typename T>
+inline bool TO_BOOLEAN(v8::Handle<T> object)
+{
+	return object->BooleanValue();
+}
+
+template<typename T>
 inline T TO_PTR(v8::Handle<v8::Value> value)
 {
 	return (T)v8::External::Unwrap(value);
