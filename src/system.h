@@ -20,6 +20,8 @@ class System : public Object<System>
 
 	static v8::Persistent<v8::Object> sources;
 	static v8::Handle<v8::Value> create();
+
+	static void reportException(v8::TryCatch *trycatch);
 };
 
 V8H_NS_END

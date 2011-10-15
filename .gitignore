@@ -6,3 +6,4 @@ tests
 *.o
 *.swp
 build
+*.js

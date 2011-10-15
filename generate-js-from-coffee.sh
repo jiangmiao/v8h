@@ -9,14 +9,9 @@ else
   cmd='cwb'
 fi
 
-for name in core net
+for name in modules/core modules/net benchmark examples test
 do
-  eval coffee -$cmd -o bin/modules/$name modules/$name/*.coffee $watch
-done
-
-for name in benchmark examples test
-do
-  eval coffee -$cmd -o bin/$name $name/*.coffee $watch
+  eval coffee -$cmd -o $name $name/*.coffee $watch
 done
 
 if [ "$1" != "" ]; then

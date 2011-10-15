@@ -99,22 +99,13 @@ int main(int argc, char **argv)
 		var path = File.realpath(file); \
 		if (!path)  \
 		throw new Error('cannot find startup file '+ file); \
-		System.absoluteRequire(path) \
+		System.absoluteRequire(path); \
 	}).call(this);"), String::New("core"));
 	if (script.IsEmpty()) {
 		dumpError(trycatch);
 	} else {
 		script->Run();
-		if (trycatch.HasCaught()) {
-			auto stackTrace = trycatch.StackTrace();
-			if (!stackTrace.IsEmpty()) {
-				String::Utf8Value info(stackTrace);
-				eputs(*info);
-			} else {
-				dumpError(trycatch);
-			}
-
-		}
+		System::reportException(&trycatch);
 	}
 	return 0;
 }

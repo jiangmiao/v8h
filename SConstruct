@@ -24,7 +24,7 @@ env.Append(LIBS = ['v8', 'pthread'])
 env.Append(CCFLAGS = '-fno-exceptions -Wall')
 
 env.VariantDir('build', 'src')
-env.Program('bin/v8h', [
+env.Program('v8h', [
   "build/v8h.cc",
   "build/buffer.cc",
   "build/algorithm.cc",

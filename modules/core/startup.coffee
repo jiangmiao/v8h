@@ -43,7 +43,6 @@ do ->
       require ARGV[1]
     else
       require File.join System.getWorkingDir(), ARGV[1]
-
     $run()
   else
     puts "usage: v8h script"

@@ -8,7 +8,61 @@
 
 V8H_NS_START
 
+const char scriptPrefix[] = "(function() {var exports = {};";
+const int  scriptPrefixLen = sizeof(scriptPrefix) - 1;
+const char scriptSuffix[] = "\n;return exports;}).call(this)";
 v8::Persistent<v8::Object> System::sources;
+
+// Extracts a C string from a V8 Utf8Value.
+const char* ToCString(const v8::String::Utf8Value& value) {
+  return *value ? *value : "<string conversion failed>";
+}
+void System::reportException(v8::TryCatch* try_catch) 
+{
+	if (!try_catch->HasCaught())
+		return;
+	v8::HandleScope handle_scope;
+	v8::String::Utf8Value exception(try_catch->Exception());
+	const char* exception_string = ToCString(exception);
+	v8::Handle<v8::Message> message = try_catch->Message();
+	if (message.IsEmpty()) {
+		// V8 didn't provide any extra information about this error; just
+		// print the exception.
+		printf("%s\n", exception_string);
+	} else {
+		// Print (filename):(line number): (message).
+		v8::String::Utf8Value filename(message->GetScriptResourceName());
+		const char* filename_string = ToCString(filename);
+		int linenum = message->GetLineNumber();
+		printf("%s:%i: %s\n", filename_string, linenum, exception_string);
+		// Print line of source code.
+		v8::String::Utf8Value sourceline(message->GetSourceLine());
+		const char* sourceline_string = ToCString(sourceline);
+		int start = 0;
+		if (linenum == 1)
+			start = scriptPrefixLen;
+		printf("%s\n", sourceline_string+start);
+		// Print wavy underline (GetUnderline is deprecated).
+		start = message->GetStartColumn();
+		if (linenum == 1)
+			start -= scriptPrefixLen;
+		for (int i = 0; i < start; i++) {
+			printf(" ");
+		}
+		int end = message->GetEndColumn();
+		if (linenum == 1)
+			end -= scriptPrefixLen;
+		for (int i = start; i < end; i++) {
+			printf("^");
+		}
+		printf("\n");
+		v8::String::Utf8Value stack_trace(try_catch->StackTrace());
+		if (stack_trace.length() > 0) {
+			const char* stack_trace_string = ToCString(stack_trace);
+			printf("%s\n", stack_trace_string);
+		}
+	}
+}
 
 V8H_FUNCTION(System::startup)
 {
@@ -17,6 +71,7 @@ V8H_FUNCTION(System::startup)
 
 V8H_FUNCTION(System::absoluteRequire)
 {
+	v8::TryCatch trycatch;
 	V8H_ASSERT(args.Length() == 1);
 	auto global = v8::Context::GetCurrent()->Global();
 	v8::String::Utf8Value path(args[0]);
@@ -28,7 +83,7 @@ V8H_FUNCTION(System::absoluteRequire)
 
 	Buffer buffer(1024);
 	// inject exports roughly
-	buffer.write("(function() {var exports = {};");
+	buffer.write(scriptPrefix);
 	while (size_t n = fread(buffer.prepare(4096), 1, buffer.remain(), file)) {
 		buffer.commit(n);
 	}
@@ -37,10 +92,9 @@ V8H_FUNCTION(System::absoluteRequire)
 		fclose(file);
 		return THROW_SYSTEM_EXCEPTION("read file failed");
 	}
-	buffer.write(";return exports;}).call(this)");
+	buffer.write(scriptSuffix);
 	// fwrite(buffer.data(), 1, buffer.size(), stderr);
 	auto source   = v8::String::New(buffer.data(), buffer.size());
-	// v8::TryCatch trycatch;
 
 	// Save source code to sources
 	SET(global, "__SOURCE__", source);
@@ -49,16 +103,15 @@ V8H_FUNCTION(System::absoluteRequire)
 	sources->Set(args[0], lines);
 
 	v8::Handle<v8::Script> script;
-	//v8::TryCatch trycatch;
 	script = v8::Script::New(source, args[0]);
 	if (script.IsEmpty()) {
-		//puts(*v8::String::Utf8Value(trycatch.Message()->GetSourceLine())); return trycatch.ReThrow();
-		return THROW_EXCEPTION("compile failed");
+		System::reportException(&trycatch);
 	}
 
 	auto oldDir  = GET(global, "requireDir");
 	SET(global, "requireDir", v8::String::New(dirname(*path)));
 	auto result = script->Run();
+	System::reportException(&trycatch);
 	SET(global, "requireDir", oldDir);
 	return result;
 }

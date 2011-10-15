@@ -33,11 +33,8 @@ V8H_FUNCTION(Assert::eq)
 	if (actual->StrictEquals(expected)) {
 		return v8::True();
 	} else{
-		auto message = args.Length() == 3 ? args[2]->ToString() : v8::String::NewSymbol("");
-		auto stackTrace = v8::StackTrace::CurrentStackTrace(2);
-		auto stackFrame = stackTrace->GetFrame(1);
-		auto scriptName = stackFrame->GetScriptName();
-		puts(*v8::String::Utf8Value(scriptName));
+		auto message = args.Length() == 2 ? args[1]->ToString() : v8::String::NewSymbol("");
+		System::dumpStackTrace();
 		return ThrowException(v8::Exception::Error(message));
 	}
 }
