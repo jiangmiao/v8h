@@ -11,12 +11,12 @@ fi
 
 for name in core net
 do
-  eval coffee -$cmd -o modules/$name coffee/$name/*.coffee $watch
+  eval coffee -$cmd -o bin/modules/$name modules/$name/*.coffee $watch
 done
 
 for name in benchmark examples test
 do
-  eval coffee -$cmd -o js/$name $name/*.coffee $watch
+  eval coffee -$cmd -o bin/$name $name/*.coffee $watch
 done
 
 if [ "$1" != "" ]; then

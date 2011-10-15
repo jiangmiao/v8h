@@ -1,0 +1,35 @@
+\Class IO
+\Member
+  length
+
+\Methods
+  General
+  =======
+    size
+
+  Writer
+  ======
+    write
+    writeBuffer
+    writeString
+    writeInt32
+    writeUint32
+    writeDouble
+
+  Reader
+  ======
+    read
+    readBuffer
+    readString
+    readInt32
+    readUint32
+    readDouble
+
+  Peeker
+  ======
+    peek
+    peekBuffer
+    peekString
+    peekInt32
+    peekUint32
+    peekDouble

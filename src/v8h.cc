@@ -12,9 +12,19 @@ V8H_FUNCTION(puts)
 	for (int i=0; i<args.Length(); ++i) {
 		v8::String::Utf8Value data(args[0]);
 		fwrite(*data, 1, data.length(), stdout);
+		fwrite("\n", 1, 1, stdout);
 	}
-	fwrite("\n", 1, 1, stdout);
 	fflush(stdout);
+	return v8::Undefined();
+}
+
+V8H_FUNCTION(print)
+{
+	for (int i=0; i<args.Length(); ++i) {
+		v8::String::Utf8Value data(args[0]);
+		fwrite(*data, 1, data.length(), stdout);
+		fwrite(" ", 1, 1, stdout);
+	}
 	return v8::Undefined();
 }
 
@@ -46,6 +56,13 @@ V8H_FUNCTION(test)
 	return String::New(buffer);
 }
 
+void eputs(const char *text)
+{
+	fputs(text, stderr);
+	fputs("\n", stderr);
+	fflush(stderr);
+}
+
 int main(int argc, char **argv)
 {
 	V8H_DEBUG("V8 version: %s", V8::GetVersion());
@@ -55,18 +72,19 @@ int main(int argc, char **argv)
 	Context::Scope contextScope(context);
 	auto global = context->Global();
 
-	auto Internal = v8::Object::New();
-	SET(global, "Internal", Internal);
 	SET(global, "Buffer", Buffer::create());
 	SET(global, "Assert", Assert::create());
 	SET(global, "File"  , File::create());
 	SET(global, "System", System::create());
 	SET(global, "Service", Service::create());
 	SET(global, "puts"  , puts);
+	SET(global, "print"  , print);
 	SET(global, "global", global);
 	SET(global, "absoluteRequire", System::absoluteRequire);
 	SET(global, "test", test);
 
+	auto Internal = v8::Object::New();
+	SET(global, "Internal", Internal);
 	SET(Internal, "Socket" , Socket::create());
 
 	auto ARGV = v8::Array::New();
@@ -76,7 +94,13 @@ int main(int argc, char **argv)
 	SET(global, "ARGV", ARGV);
 
 	TryCatch trycatch;
-	 auto script = Script::New(String::New("(function(){var file = System.getBinDir()+'/../modules/core/startup.js'; var path = File.realpath(file); if (!path) throw new Error('cannot find startup file '+ file);System.absoluteRequire(path)}).call(this);"), String::New("core"));
+	auto script = Script::New(String::New("(function(){ \
+		var file = System.getBinDir()+'/modules/core/startup.js'; \
+		var path = File.realpath(file); \
+		if (!path)  \
+		throw new Error('cannot find startup file '+ file); \
+		System.absoluteRequire(path) \
+	}).call(this);"), String::New("core"));
 	if (script.IsEmpty()) {
 		dumpError(trycatch);
 	} else {
@@ -85,8 +109,7 @@ int main(int argc, char **argv)
 			auto stackTrace = trycatch.StackTrace();
 			if (!stackTrace.IsEmpty()) {
 				String::Utf8Value info(stackTrace);
-				fputs(*info, stderr);
-				fputs("\n", stderr);
+				eputs(*info);
 			} else {
 				dumpError(trycatch);
 			}

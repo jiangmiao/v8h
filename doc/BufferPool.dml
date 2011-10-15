@@ -1,0 +1,14 @@
+\Class BufferPool
+\Members
+\Methods in JS
+  push
+    buffer : Buffer
+
+  pop 
+    -> buffer : Buffer
+
+\Methods in V8
+\C++ Methods
+  push 
+  pop -> Handle<Buffer>
+

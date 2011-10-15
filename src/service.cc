@@ -198,7 +198,7 @@ V8H_FUNCTION(Service::run)
 
 				auto result   = callback->Call(self, 0, NULL);
 				if (result.IsEmpty()) {
-					V8H_LEAVE(result);
+					return result;
 				}
 			}
 		}

@@ -1,0 +1,75 @@
+\Class File
+\Constants
+  
+\Member
+\Methods
+  File
+  ====
+    open
+      path : String
+      mode : String
+    close
+    seek
+
+
+  Sync Reader
+  ===========
+    syncRead
+      buffer : Buffer
+      length : Int32
+
+    syncReadBuffer
+    syncReadUtf8
+    syncReadInt32
+    syncReadUint32
+    syncReadInt64
+    syncReadDouble
+
+  Sync Writer
+  ===========
+    syncWrite
+      buffer : Buffer
+      length : Int32
+
+    syncWriteBuffer
+    syncWriteUtf8
+    syncWriteInt32
+    syncWriteUint32
+    syncWriteInt64
+    syncWriteDouble
+    syncWriteDouble
+
+
+
+  Async Reader
+  ============
+    read
+      buffer : Buffer
+      length : Int32
+      callback : Function
+
+    readBuffer
+    readUtf8
+    readInt32
+    readUint32
+    readInt64
+    readDouble
+
+  Async Writer
+  ============
+    write
+      buffer : Buffer
+      length : Int32
+      callback : Function
+
+    writeBuffer
+    writeUtf8
+    writeInt32
+    writeUint32
+    writeInt64
+    writeDouble
+
+\Static Methods
+  join
+    dir : String
+    file : String

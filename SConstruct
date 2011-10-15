@@ -11,7 +11,7 @@ Help(vars.GenerateHelpText(env))
 mode = ARGUMENTS.get('mode', 'debug')
 if (mode == 'release'):
   # -DV8H_NDEBUG
-  env.Append(CCFLAGS = '-O3 -DNDEBUG')
+  env.Append(CCFLAGS = '-O3 -DNDEBUG -DV8H_NDEBUG')
 else:
   env.Append(CCFLAGS = '-O0 -g')
 
@@ -23,14 +23,15 @@ if (v8path != ''):
 env.Append(LIBS = ['v8', 'pthread'])
 env.Append(CCFLAGS = '-fno-exceptions -Wall')
 
+env.VariantDir('build', 'src')
 env.Program('bin/v8h', [
-  "src/v8h.cc",
-  "src/buffer.cc",
-  "src/algorithm.cc",
-	"src/assert.cc",
-	"src/file.cc",
-  "src/system.cc",
-  "src/service.cc",
-  "src/socket.cc"
+  "build/v8h.cc",
+  "build/buffer.cc",
+  "build/algorithm.cc",
+  "build/assert.cc",
+  "build/file.cc",
+  "build/system.cc",
+  "build/service.cc",
+  "build/socket.cc"
 ])
 

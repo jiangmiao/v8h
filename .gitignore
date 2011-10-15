@@ -5,3 +5,4 @@ tests
 .sconsign.dblite
 *.o
 *.swp
+build

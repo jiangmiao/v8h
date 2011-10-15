@@ -1,0 +1,167 @@
+\Class Internal::Socket
+\Constants
+  PF_INET
+  PF_INET6
+  PF_UNIX
+
+  AF_INET
+  AF_INET6
+  AF_UNIX
+
+  SOCK_STREAM
+  SOCK_DGRAM
+
+  SHUT_RD
+  SHUT_WR
+  SHUT_RDWR
+
+
+\Static Methods
+  Defined In C++
+  ==============
+
+    socket -> Int32
+      domain   : Int32
+      family   : Int32
+      protocol : Int32
+
+    close
+      fd : Int32
+
+    shutdown -> Int32
+      fd  : Int32
+      how : Int32
+
+    listen -> Int32
+      fd : Int32
+
+    bindTcp -> Int32
+      fd      : Int32
+      address : String
+      port    : Int32 = 0
+
+    bindUnix -> Int32
+      fd   : Int32
+      path : String
+
+    connectTcp -> Int32
+      fd      : Int32
+      address : String
+      port    : Int32
+
+    connectUnix -> Int32
+      fd   : Int32
+      path : String
+
+    acceptTcp -> Int32
+      fd      : Int32
+      address : String
+      port    : Int32
+
+    acceptUnix -> Int32
+      fd   : Int32
+      path : String
+
+    readBuffer -> Int32
+      fd     : Int32
+      buffer : Buffer
+
+    writeBuffer -> Int32
+      fd         : Int32
+      buffer     : Buffer
+
+  Defined In Javascript
+  =====================
+
+    createTcp -> Int32
+
+    createUnix -> Int32
+
+    accept -> Int32
+      family : Int32 , Socket.TCP | Sokcet.UNIX
+      fd     : Int32
+
+\Class Socket
+\Methods
+  General
+  =======
+    constructor -> Object [private]
+      fd       : Int32
+      family   : Int32
+      address  : String
+      port     : Int32
+
+  Socket
+  ======
+    accept
+      callback : Function(client:Socket)
+
+    connect [private]
+      family   : Int32
+      address  : Int32
+      port     : Int32
+      callback : Function(client: Socket)
+
+    listen
+      backlog : Int32
+      -> result : Boolean
+
+    close
+
+  Writer
+  ======
+
+    writeUntilOnce [private]
+      buffer    : Buffer
+      condition : Function
+      callback  : Function
+
+    writeUntil
+      buffer    : Buffer
+      condition : Function
+      callback  : Function
+
+    # write buffer until buffer.size() == 0
+    # buffer will be modified
+    writeBuffer
+      buffer   : Buffer
+      callback : Function
+
+    # write String
+    writeUtf8
+      utf8text : String
+      callback : Function
+
+  Reader
+  ======
+    # read until condition() == true
+    readUntil
+      buffer    : Buffer
+      condition : Condition
+      callback  : Function
+
+    # read until buffer.size() >= size
+    readSize
+      buffer : Buffer
+      size   : Int32
+      callback : Function(n)
+
+    # read until delim
+    readToken
+      buffer   : Buffer
+      delim    : Buffer
+      callback : Function(n)
+
+\Static Methods
+  parse -> [family, address, port]
+    address_str : String
+
+  createServer ->
+    address        : String
+    options        : Object [optional]
+    acceptCallback : Function(client: Socket)
+
+  connect ->
+    address         : String
+    options         : Object [optional]
+    connectCallback : Function(client: Socket)

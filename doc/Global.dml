@@ -1,0 +1,56 @@
+\Class Global
+\Static Methods
+  STDOUT
+  ======
+    printOne
+      arg : Any
+    
+    puts
+      args : Any...
+
+    print
+      args : Any...
+
+    flush
+
+  Module
+  ======
+    require : Object
+      file : String
+
+
+  Service
+  =======
+    $in
+      fd : Int32
+      callback : Function
+
+    $out
+      fd : Int32
+      callback : Function
+
+    $error
+      fd : Int32
+      callback : Function
+
+    $timeout
+      timeout  : Int32
+      callback : Function
+
+
+\ClassTimer
+\Members
+  expired_at : Int32
+  next : 
+首先以1秒为单位分组，共分1800组，基础占用7.2K字节
+每次检测时以上次检测点起，检测至当前时间点Tick
+\Class Timers
+  checked_at : Int32
+
+
+
+timer = $timeout 20000, ->
+  puts 'Timeout'
+
+timer.expired_at = 
+timer.reset 20000

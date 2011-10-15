@@ -26,6 +26,7 @@ class Internal
 		return (T*)GET_PTR(object, FIELD_INTERNAL);
 	}
 
+	// Get internal from any Handle<T>
 	template<typename S>
 	static T * getInternal(v8::Handle<S> value)
 	{

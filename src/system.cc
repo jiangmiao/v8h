@@ -17,7 +17,7 @@ V8H_FUNCTION(System::startup)
 
 V8H_FUNCTION(System::absoluteRequire)
 {
-	V8H_ENSURE(args.Length() == 1);
+	V8H_ASSERT(args.Length() == 1);
 	auto global = v8::Context::GetCurrent()->Global();
 	v8::String::Utf8Value path(args[0]);
 	FILE *file = fopen(*path, "r");
@@ -41,6 +41,8 @@ V8H_FUNCTION(System::absoluteRequire)
 	// fwrite(buffer.data(), 1, buffer.size(), stderr);
 	auto source   = v8::String::New(buffer.data(), buffer.size());
 	// v8::TryCatch trycatch;
+
+	// Save source code to sources
 	SET(global, "__SOURCE__", source);
 	auto lines = v8::Script::New(v8::String::New("global.__SOURCE__.split('\\n');"))->Run();
 	global->Delete(v8::String::New("__SOURCE__"));
@@ -63,8 +65,8 @@ V8H_FUNCTION(System::absoluteRequire)
 
 V8H_FUNCTION(System::getBinDir)
 {
-	char proc_path[PATH_MAX];
-	char bin_path[PATH_MAX];
+	char proc_path[PATH_MAX] = {0};
+	char bin_path[PATH_MAX] = {0};
 	snprintf(proc_path, sizeof(proc_path), "/proc/%d/exe", getpid());
 	if ( readlink(proc_path, bin_path, sizeof(bin_path)) == -1 ) {
 		return THROW_SYSTEM_EXCEPTION("get bin dir failed");

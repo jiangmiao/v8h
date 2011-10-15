@@ -1,0 +1,38 @@
+\Class Service
+\Members
+  fds: Hash(fd -> Function)
+  fdsError : Hash(fd -> Function)
+  
+\Methods
+  in
+    fd : Int32
+    callback : Function
+
+  out
+    fd : Int32
+    callback : Function
+
+  del
+    fd : Int32
+
+  error
+    fd : Int32
+    callback : Function(errorCode)
+
+  wait
+    timeout : Uint32
+
+  run
+
+  close
+
+  trigger
+    fd : Int32
+
+  triggerByEventId
+    eventId : Int32
+
+  getCallbackFromEventId
+    eventId : Int32
+
+  getFdsNumber

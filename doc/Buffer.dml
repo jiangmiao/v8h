@@ -1,0 +1,233 @@
+\Class Buffer
+
+Javascript
+==========
+\Methods
+  Data Control
+  ============
+    data
+      ->char*
+
+    # Fill zero width \0 to the last of the buffer make the buffer is an valid string
+    zero
+
+    prepare ->char*
+      size : Uint32
+
+    commit
+      size : Uint32
+
+    consume
+      size : Uint32
+
+    clear
+
+    destroy
+
+  Length Getter
+  =============
+
+    # the size of the buffer
+    size -> Uint32
+
+    # the remain space of the buffer
+    remain -> Uint32
+
+  Writer
+  ======
+    writeBuffer -> Uint32
+      buffer : Buffer
+      size : Uint32
+
+    writeUtf8
+      string : String
+
+    writeUint32
+      number : Uint32
+
+    writeInt32
+      number : Int32
+
+    writeInt64
+      number : Int64
+
+    writeDouble
+      number : Double
+
+  Reader
+  ======
+
+    readBuffer -> Uint32
+      buffer : Buffer
+      size : Uint32
+
+    readBuffer -> Buffer
+      size : Uint32
+
+    readUtf8 -> String
+      size : Uint32
+
+    readInt32 -> Int32
+    readUint32 -> Uint32
+    readInt64 -> Int64
+    readDouble -> Double
+
+  Peeker
+  ======
+    # Peeker will get the data without remove from buffer
+
+    peekBuffer -> Uint32
+      buffer : Buffer
+      size : Uint32 = self->size()
+
+    peekBuffer -> Buffer
+      size : Uint32 = self->size()
+
+    peekUtf8 -> String
+      size : Uint32 = self->size()
+
+    peekInt32 -> Int32
+    peekUint32 -> Uint32
+    peekInt64 -> Int64
+    peekDouble -> Double
+
+
+  Utils
+  =====
+
+    # Partial find will return the the last pos
+    # found     : newOffset + dest.size() <= buffer.size()
+    #           : dest.size() == 0
+    # not found : newOffset + dest.size() > buffer.size() 
+    partialFind -> newOffset : Uint32
+      dest : Buffer*
+      offset : Uint32
+
+\Static Methods
+  create
+    
+C++
+===
+\Members
+  # the memory address allocated
+  memory_  : char*
+
+  # current cursor position
+  cursor_  : uint32_t
+
+  # the size of the data
+  size_    : uint32_t
+
+  # the total size of memory
+  reserve_ : uint32_t
+
+\Methods
+
+  Size Getter
+  ===========
+
+    size -> uint32_t
+
+    # the memory used == cursor_ + size_
+    used -> int32_t
+
+    # remain memory could be used == reserve_ - used()
+    remain -> uint32_t
+
+  Data Control
+  ============
+
+    # memory_ + cursor_
+    data -> char*
+
+    zero
+
+    prepare -> char*
+      size : uint32_t
+
+    commit
+      size : uint32_t
+
+    consume
+      size : uint32_t
+
+  Writer
+  ======
+
+    write
+      data : char*
+
+    write
+      data : void*
+      size : uint32_t
+
+    writeBuffer
+      buffer : Buffer*
+      size : uint32_t
+
+    writeInt32
+      data : int32_t
+
+    writeUint32
+      data : uint32_t
+    
+    writeInt64
+      data : uint64_t
+
+    writeDouble
+      data : double
+
+  Peeker
+  ======
+    peek
+      data : void*
+      size : uint32_t
+
+    peekBuffer
+      buffer : Buffer*
+      size : uint32_t
+
+    peekInt32
+    peekUint32
+    peekInt64
+    peekDouble
+
+  Reader
+  ======
+
+    read
+      data : void*
+      size : uint32_t
+
+    readBuffer
+      buffer : Buffer*
+      size : uint32_t
+
+    readInt32 -> int32_t
+    readUint32 -> uint32_t
+    readInt64 -> int64_t
+
+    
+  Utils
+  =====
+    partialFind -> uint32_t
+      needle : Buffer*
+      offset : uint32_t
+
+  V8 Declaration
+  ==============
+    V8H_DECLARE_INTERNAL
+    V8H_DECLARE_CLASS
+
+
+  Buffer Pool
+  ===========
+    
+\Static Functions
+
+  # Get a buffer from buffer pool
+  pop
+
+  # Put a buffer to buffer pool
+  push
+    

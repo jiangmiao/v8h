@@ -1,21 +1,3 @@
-###
-Client:
-Socket.connect "119.75.217.56:80", (client)->
-  buffer = Buffer.pop()
-  close = ->
-    Buffer.push buffer
-    client.close()
-
-  client.error ->
-    puts System.getLastError()
-    close()
-
-  client.writeUtf8 "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n", ->
-    client.readToken buffer, header_delim, (n)->
-      puts buffer.readUtf8(n)
-      client.close()
-
-###
 i = Internal.Socket
 v8h.extend i,
   createTcp: ->
@@ -26,12 +8,15 @@ v8h.extend i,
 
   accept: (family, fd) ->
     switch family
-      when i.PF_TCP 
+      when i.PF_INET 
         @acceptTcp fd
       when i.PF_UNIX 
         @acceptUnix fd
 
 class Socket
+  @TCP:  i.PF_INET
+  @UNIX: i.PF_UNIX
+
   constructor: (@fd, @family, @address, @port) ->
     @events = {}
 
@@ -52,7 +37,7 @@ class Socket
       callback.call @, @
 
     switch family
-      when i.PF_TCP
+      when i.PF_INET
         i.connectTcp @fd, address, port
       when i.PF_UNIX
         i.connectUnix @fd, address
@@ -149,7 +134,7 @@ class Socket
       when 'unix'
         address[0] = i.PF_UNIX
       when 'tcp'
-        address[0] = i.PF_TCP
+        address[0] = i.PF_INET
       else
         address.unshift Socket.TCP
     if address.length < 3
@@ -168,7 +153,7 @@ class Socket
 
     [family, address, port] = @parse(address)
     switch family
-      when i.PF_TCP
+      when i.PF_INET
         fd = i.createTcp()
         if i.bindTcp(fd, address, port) == -1
           System.raiseSystem "bind address #{address}:#{port} failed"
@@ -177,7 +162,7 @@ class Socket
         if i.bindUnix(fd, address) == -1
           System.raiseSystem "bind unix socket #{address} failed"
       else
-        System.raiseSystem "unsupported protocol"
+        System.raise "unsupported protocol"
 
     server = new Socket(fd, family, address, port)
     server.listen backlog
@@ -192,7 +177,7 @@ class Socket
 
     [family, address, port] = @parse(address)
     switch family
-      when i.PF_TCP
+      when i.PF_INET
         fd = i.createTcp()
         System.raise "create tcp" if fd == -1
       when i.PF_UNIX

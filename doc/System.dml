@@ -1,0 +1,12 @@
+\Static Methods
+  STDOUT
+  ======
+    absoluteRequire
+      absolutePath : String
+
+    getBinDir
+    getWorkingDir
+    getEnv
+      name : String
+
+    dumpStackTrace

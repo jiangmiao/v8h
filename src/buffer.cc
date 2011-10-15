@@ -1,4 +1,5 @@
 #include "buffer.h"
+#include "algorithm.h"
 
 V8H_NS_START
 Buffer::Buffer(uint32_t reserve)

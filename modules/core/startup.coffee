@@ -31,6 +31,7 @@ do ->
     exports
 
   require './v8h.js'
+  require './console.js'
   require './system.js'
   require './buffer.js'
   require './service.js'

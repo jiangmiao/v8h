@@ -7,4 +7,3 @@ class Console
 
 
 global.console = new Console()
-global.$console = global.console

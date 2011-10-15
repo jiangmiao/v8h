@@ -1,0 +1,5 @@
+\Class Internal<T>
+\C++ Methods
+  getInternal -> T *
+    object : Handle<Object>
+
