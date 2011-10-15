@@ -38,20 +38,13 @@ void System::reportException(v8::TryCatch* try_catch)
 		// Print line of source code.
 		v8::String::Utf8Value sourceline(message->GetSourceLine());
 		const char* sourceline_string = ToCString(sourceline);
-		int start = 0;
-		if (linenum == 1)
-			start = scriptPrefixLen;
-		printf("%s\n", sourceline_string+start);
+		printf("%s\n", sourceline_string);
 		// Print wavy underline (GetUnderline is deprecated).
-		start = message->GetStartColumn();
-		if (linenum == 1)
-			start -= scriptPrefixLen;
+		int start = message->GetStartColumn();
 		for (int i = 0; i < start; i++) {
 			printf(" ");
 		}
 		int end = message->GetEndColumn();
-		if (linenum == 1)
-			end -= scriptPrefixLen;
 		for (int i = start; i < end; i++) {
 			printf("^");
 		}
@@ -73,7 +66,8 @@ V8H_FUNCTION(System::absoluteRequire)
 {
 	v8::TryCatch trycatch;
 	V8H_ASSERT(args.Length() == 1);
-	auto global = v8::Context::GetCurrent()->Global();
+	auto context = v8::Context::GetCurrent();
+	auto global = context->Global();
 	v8::String::Utf8Value path(args[0]);
 	FILE *file = fopen(*path, "r");
 	V8H_DEBUG("require: %s", *path);
@@ -83,7 +77,6 @@ V8H_FUNCTION(System::absoluteRequire)
 
 	Buffer buffer(1024);
 	// inject exports roughly
-	buffer.write(scriptPrefix);
 	while (size_t n = fread(buffer.prepare(4096), 1, buffer.remain(), file)) {
 		buffer.commit(n);
 	}
@@ -92,7 +85,6 @@ V8H_FUNCTION(System::absoluteRequire)
 		fclose(file);
 		return THROW_SYSTEM_EXCEPTION("read file failed");
 	}
-	buffer.write(scriptSuffix);
 	// fwrite(buffer.data(), 1, buffer.size(), stderr);
 	auto source   = v8::String::New(buffer.data(), buffer.size());
 
@@ -110,10 +102,14 @@ V8H_FUNCTION(System::absoluteRequire)
 
 	auto oldDir  = GET(global, "requireDir");
 	SET(global, "requireDir", v8::String::New(dirname(*path)));
-	auto result = script->Run();
+	auto old_exports = GET(global, "exports");
+	auto exports     = v8::Object::New();
+	SET(global, "exports", exports);
+	script->Run();
+	SET(global, "exports", old_exports);
 	System::reportException(&trycatch);
 	SET(global, "requireDir", oldDir);
-	return result;
+	return exports;
 }
 
 V8H_FUNCTION(System::getBinDir)

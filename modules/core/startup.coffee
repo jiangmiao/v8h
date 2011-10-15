@@ -46,13 +46,3 @@ do ->
     $run()
   else
     puts "usage: v8h script"
-
-###
-scriptFile = $argv[1]
-if scriptFile[0] == '/'
-  require script
-else
-  require __DIR__ + '/' + scriptFile
-
-$run()
-###

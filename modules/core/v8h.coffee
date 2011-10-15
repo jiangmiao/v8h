@@ -1,3 +1,4 @@
+exports.hello = 'hello'
 class v8h
   @extend = ->
     args = Array::slice.call arguments, 0
