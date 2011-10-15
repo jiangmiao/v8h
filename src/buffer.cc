@@ -252,6 +252,20 @@ void Buffer::show()
 	fflush(stdout);
 }
 
+// Save and Restore Cursor
+// =======================
+void Buffer::save()
+{
+	savedCursor.cursor = cursor_;
+	savedCursor.size   = size_;
+}
+
+void Buffer::restore()
+{
+	cursor_ = savedCursor.cursor;
+	size_   = savedCursor.size;
+}
+
 // Javascript Implements
 // =====================
 
@@ -272,6 +286,7 @@ V8H_FORWARD_0_1(Buffer , size    , V8_UINT);
 V8H_FORWARD_0_1(Buffer , remain  , V8_UINT);
 V8H_FORWARD_0_1(Buffer , used    , V8_UINT);
 V8H_FORWARD_0_1(Buffer , reserve , V8_UINT);
+
 
 // Writer
 // ======
@@ -402,6 +417,11 @@ V8H_FUNCTION(Buffer::partialFind)
 
 V8H_FORWARD_0_0(Buffer , show);
 
+// Cursor Save and restore
+// =======================
+V8H_FORWARD_0_0(Buffer , save);
+V8H_FORWARD_0_0(Buffer , restore);
+
 // Constructor
 // ===========
 V8H_FUNCTION(Buffer::constructor) // }}}
@@ -465,6 +485,11 @@ v8::Handle<v8::Function> Buffer::create()
 	V8H_IMPLEMENT(peekUint32);
 	V8H_IMPLEMENT(peekInt64);
 	V8H_IMPLEMENT(peekDouble);
+
+	// Cursor save and Restore
+	// =======================
+	V8H_IMPLEMENT(save);
+	V8H_IMPLEMENT(restore);
 
 	V8H_IMPLEMENT(partialFind);
 	V8H_IMPLEMENT(show);

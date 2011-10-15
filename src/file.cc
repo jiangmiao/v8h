@@ -5,7 +5,7 @@ V8H_NS_START
 
 V8H_FUNCTION(File::realpath)
 {
-	V8H_ENSURE(args.Length() == 1);
+	V8H_ASSERT(args.Length() == 1);
 
 	static char resolvedPath[PATH_MAX];
 	char *result = ::realpath(*v8::String::Utf8Value(args[0]), resolvedPath);

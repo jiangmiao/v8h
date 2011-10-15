@@ -85,7 +85,7 @@ V8H_FUNCTION(System::getWorkingDir)
 
 V8H_FUNCTION(System::getEnv)
 {
-	V8H_ENSURE(args.Length() == 1);
+	V8H_ASSERT(args.Length() == 1);
 	auto value = getenv(*v8::String::Utf8Value(args[0]));
 	if (value) {
 		return v8::String::New(value);

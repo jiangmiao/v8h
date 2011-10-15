@@ -62,6 +62,16 @@ test "Buffer: write read peek", ->
   eq buffer.peekUtf8()                          , ' world'          , 'peekBuffer2'
   eq buffer.readBuffer(destBuffer).readUtf8()   , "hellohello world", 'readBuffer2'
 
+test "Buffer save and restore", ->
+  buffer = new Buffer("hello world")
+  buffer.save()
+  eq buffer.size(), 11
+  buffer.consume(5)
+  eq buffer.size(), 6
+  buffer.restore()
+  eq buffer.size(), 11
+  eq buffer.peekUtf8(), 'hello world'
+
 test "Buffer partialFind", ->
   buffer = new Buffer("hello world")
   eq buffer.partialFind(new Buffer("ld")), 9

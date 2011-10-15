@@ -114,7 +114,7 @@ V8H_FUNCTION(Socket::acceptUnix)
 
 V8H_C_2_1(Socket, listen, TO_INT, TO_INT, V8_INT);
 
-// writeBuffer(fd, buffer, autoConsume = true)
+// writeBuffer(fd, buffer)
 V8H_FUNCTION(Socket::writeBuffer)
 {
 	int argc = args.Length();

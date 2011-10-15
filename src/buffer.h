@@ -15,6 +15,11 @@ class Buffer :  public Object<Buffer>, public Internal<Buffer>
 	uint32_t cursor_;
 	uint32_t size_;
 	uint32_t reserve_;
+
+	struct {
+		uint32_t cursor;
+		uint32_t size;
+	} savedCursor;
     public:
 	Buffer(uint32_t reserve = 1024);
 	~Buffer();
@@ -68,6 +73,10 @@ class Buffer :  public Object<Buffer>, public Internal<Buffer>
 	// Utils
 	uint32_t partialFind(Buffer *needle, uint32_t offset);
 	void     show();
+
+	// Status Save and Restore
+	void save();
+	void restore();
     public:
 	// Data Control
 	// ===========
@@ -118,6 +127,11 @@ class Buffer :  public Object<Buffer>, public Internal<Buffer>
 	// =====
 	static V8H_FUNCTION(partialFind);
 	static V8H_FUNCTION(show);
+
+	// Cursor Save and Restore
+	// =======================
+	static V8H_FUNCTION(save);
+	static V8H_FUNCTION(restore);
 
 	// Construtor
 	// ==========

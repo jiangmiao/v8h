@@ -116,10 +116,12 @@ class Socket
     @writeUntilOnce buffer, condition, callback
 
   writeBuffer: (buffer, callback) ->
+    buffer.save()
     @writeUntil buffer, ->
       buffer.size() == 0
     , ->
-      callback()
+      buffer.restore()
+      callback(buffer.size())
 
   writeUtf8: (text, callback) ->
     buffer = Buffer.popTemp()

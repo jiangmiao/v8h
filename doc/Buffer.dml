@@ -8,7 +8,7 @@ Javascript
     data
       ->char*
 
-    # Fill zero width \0 to the last of the buffer make the buffer is an valid string
+    # Fill zero width \0 to the last of the buffer make the buffer is a valid string
     zero
 
     prepare ->char*

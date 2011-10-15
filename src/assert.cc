@@ -13,7 +13,7 @@ void Assert::dumpFunction(v8::Handle<v8::Function> function)
 
 V8H_FUNCTION(Assert::ok)
 {
-	V8H_ENSURE(args.Length() == 1 || args.Length() == 2);
+	V8H_ASSERT(args.Length() == 1 || args.Length() == 2);
 	auto guard   = args[0]->BooleanValue();
 	if (guard) {
 		return v8::True();
@@ -27,7 +27,7 @@ V8H_FUNCTION(Assert::ok)
 
 V8H_FUNCTION(Assert::eq)
 {
-	V8H_ENSURE(args.Length() == 2 || args.Length() == 3);
+	V8H_ASSERT(args.Length() == 2 || args.Length() == 3);
 	auto actual   = args[0];
 	auto expected = args[1];
 	if (actual->StrictEquals(expected)) {

@@ -39,9 +39,7 @@ class Internal
 		auto self = getInternal(object);
 		if (self)
 			delete self;
-		#ifdef V8H_DEBUG
-		puts(typeid(T).name());
-		#endif
+		V8H_DEBUG("%s wasn't free property.", typeid(T).name());
 		SET_PTR(object, FIELD_INTERNAL, NULL);
 	}
 

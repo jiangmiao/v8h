@@ -1,6 +1,8 @@
 # Run memcached: memcached -s /tmp/memcached.sock"
 headerDelim = new Buffer("\r\n")
 message = new Buffer("Hello world");
+while message.size() < 32*1024
+  message.writeUtf8 "hello world"
 
 Socket.connect "unix:/tmp/memcached.sock", (client) ->
   if !client?
@@ -37,7 +39,8 @@ Socket.connect "unix:/tmp/memcached.sock", (client) ->
     do getOnce = ->
       buffer = Buffer.pop()
       buffer.writeUtf8 "get hello\r\n"
-      client.writeBuffer buffer, ->
+      client.writeBuffer buffer, (n) ->
+        buffer.consume(n)
         client.readToken buffer, headerDelim, (n) ->
           header = buffer.readUtf8(n)
           [type, key, flags, length] = header.split " "
