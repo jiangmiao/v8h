@@ -32,6 +32,20 @@ void dumpError(TryCatch &trycatch)
 
 }
 
+V8H_FUNCTION(test)
+{
+	static char *buffer = NULL;
+	if (!buffer) {
+		buffer = (char*)malloc(65535);
+		buffer[0] = 0;
+		char *start = buffer;
+		for (int i=0; i<5000; ++i) {
+			start = stpcpy(start, "helloulhello");
+		}
+	}
+	return String::New(buffer);
+}
+
 int main(int argc, char **argv)
 {
 	V8H_DEBUG("V8 version: %s", V8::GetVersion());
@@ -51,6 +65,7 @@ int main(int argc, char **argv)
 	SET(global, "puts"  , puts);
 	SET(global, "global", global);
 	SET(global, "absoluteRequire", System::absoluteRequire);
+	SET(global, "test", test);
 
 	SET(Internal, "Socket" , Socket::create());
 

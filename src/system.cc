@@ -38,6 +38,7 @@ V8H_FUNCTION(System::absoluteRequire)
 		return THROW_SYSTEM_EXCEPTION("read file failed");
 	}
 	buffer.write(";return exports;}).call(this)");
+	// fwrite(buffer.data(), 1, buffer.size(), stderr);
 	auto source   = v8::String::New(buffer.data(), buffer.size());
 	// v8::TryCatch trycatch;
 	SET(global, "__SOURCE__", source);
@@ -46,8 +47,10 @@ V8H_FUNCTION(System::absoluteRequire)
 	sources->Set(args[0], lines);
 
 	v8::Handle<v8::Script> script;
+	//v8::TryCatch trycatch;
 	script = v8::Script::New(source, args[0]);
 	if (script.IsEmpty()) {
+		//puts(*v8::String::Utf8Value(trycatch.Message()->GetSourceLine())); return trycatch.ReThrow();
 		return THROW_EXCEPTION("compile failed");
 	}
 
@@ -89,6 +92,11 @@ V8H_FUNCTION(System::getEnv)
 	}
 }
 
+V8H_FUNCTION(System::getLastError)
+{
+	return v8::String::New(strerror(errno));
+}
+
 v8::Handle<v8::Value> System::create()
 {
 	V8H_CREATE_OBJECT_START();
@@ -99,6 +107,7 @@ v8::Handle<v8::Value> System::create()
 	V8H_STATIC_IMPLEMENT(getBinDir);
 	V8H_STATIC_IMPLEMENT(getWorkingDir);
 	V8H_STATIC_IMPLEMENT(getEnv);
+	V8H_STATIC_IMPLEMENT(getLastError);
 	V8H_CREATE_END();
 }
 

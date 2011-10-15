@@ -14,6 +14,7 @@ class System : public Object<System>
 	static V8H_FUNCTION(getBinDir);
 	static V8H_FUNCTION(getWorkingDir);
 	static V8H_FUNCTION(getEnv);
+	static V8H_FUNCTION(getLastError);
 
 	static void dumpStackTrace();
 

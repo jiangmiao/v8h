@@ -15,7 +15,9 @@ class Socket : public Object<Socket>
 	// Socket
 	// ======
 	static V8H_FUNCTION(socket);
+	static V8H_FUNCTION(shutdown);
 	static V8H_FUNCTION(close);
+	static V8H_FUNCTION(listen);
 
 	static V8H_FUNCTION(bindTcp);
 	static V8H_FUNCTION(bindUnix);
@@ -25,8 +27,6 @@ class Socket : public Object<Socket>
 
 	static V8H_FUNCTION(acceptTcp);
 	static V8H_FUNCTION(acceptUnix);
-
-	static V8H_FUNCTION(listen);
 
 	// Writer
 	// ======

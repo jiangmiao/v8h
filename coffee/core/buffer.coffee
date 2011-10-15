@@ -21,6 +21,11 @@ class BufferPool
     else
       return new Buffer(512)
 
+  get: (str) ->
+    buffer = Buffer.pop()
+    buffer.writeUtf8 str
+    buffer
+
   resize: (@limit)->
     while @limit < @buffers.length
       @buffers.pop()
@@ -44,10 +49,11 @@ v8h.extend Buffer,
   popTemp: ->
     buffer = $bufferPool.pop()
     buffer.isTemp = true
+    buffer
 
   pushTemp: (buffer)->
     if buffer.isTemp?
-      buffer.push buffer
+      Buffer.push buffer
 
   slots: (n)->
     $bufferPool.resize(n)

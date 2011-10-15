@@ -1,87 +1,70 @@
 # Run memcached: memcached -s /tmp/memcached.sock"
 headerDelim = new Buffer("\r\n")
 
-memcached = Socket.createUnix()
-$error memcached, ->
-  p $systemError
-  puts "try 'memcached -s /tmp/memcached.sock' to start memcached unix socket"
-  Socket.close memcached
+message = new Buffer '<!DOCTYPE html><html><head><meta charset="utf-8"/><title>快漫</title><link href="/css/a.css?1305006217" rel="stylesheet" type="text/css"/></head><body><div class="nav"><div class="passport"><a href="/passport/login">登录</a><a href="/passport/register">注册</a></div><div class="menu"><a href="/">快漫</a><a href="/tops">动漫排行榜</a><a href="/animes">动画列表</a></div></div><div class="l2 root"><div class="sidebar"><h3 class="top">最新更新a</h3><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul><h4>4月12日</h4><ul><li><a href="/animes/0">日常</a></li><li><a href="/animes/1">DOG DAYS</a></li><li><a href="/animes/2">魔法少女小圆</a></li><li><a href="/animes/3">无名</a></li><li><a href="/animes/4">圣痕炼金士</a></li><li><a href="/animes/5">银魂</a></li><li><a href="/animes/6">圣痕</a></li></ul></div><div class="context"><h3 class="new">四月新番</h3><ul class="posters_list"></ul></div></div><div style="clear: both">1317489517</div><div class="footer">&copy;coryright 2011 kuaiman.cc</div></body></html>'
 
-puts "client: connecting /tmp/memcached.sock"
-Socket.connectUnix memcached, "/tmp/memcached.sock", =>
-  puts "client: connected"
+text = message.readUtf8()
+st = Date.now()
+text = text.replace /ul/g, ->
+  'aaa'
+puts Date.now() - st
 
-  Stream.create memcached, ->
-      # set key flags exptime bytes value CRLF
-      puts "client: set key hello's value to 'hello world'"
-      @writeUtf8 "set hello 0 30 11\r\nHello World\r\n", =>
+b = new Buffer()
+while b.size() < 100 * 1024
+  b.writeBuffer(message)
+message = b
 
-        @readToken headerDelim, (n) =>
-          print "server: "
-          print @buffer.readUtf8(n)
+Socket.connect "unix:/tmp/memcached.sock", (client) ->
+  if !client?
+    System.raise "connect failed"
 
-          # get key
-          puts "client: get key hello"
-          benchmark_get = =>
-            times = 0
-            startTime = Date.now()
-            do_benchmark = =>
-              @writeUtf8 "get hello\r\n", =>
-                recvMemcachedData = =>
-                  @readToken headerDelim, (n) =>
-                    header = @buffer.readUtf8(n)
-                    if header.match /^VALUE /
-                      [type, key, flags, length] = header.split " "
-                      length = parseInt(length)
-                      @readSize length, (n)=>
-                        @readToken headerDelim, (n) =>
-                          @buffer.consume(n)
-                          recvMemcachedData()
-                    else
-                      ++times
-                      elapsed = Date.now() - startTime
-                      if elapsed > 2000
-                        puts "get hello speed: " + parseInt(times*1000 / elapsed) + "/s"
-                        puts "now benchmark the set speed in 2 seconds"
-                        benchmark_set()
-                      else
-                        do_benchmark()
-                recvMemcachedData()
-            do_benchmark()
+  close = ->
+    client.close()
 
-          benchmark_set = =>
-            times = 0
-            startTime = Date.now()
-            do_benchmark = =>
-              @writeUtf8 "set hello 0 30 11\r\nHello World\r\n", =>
-                @readToken headerDelim, (n) =>
-                  @buffer.clear()
-                  ++times
-                  elapsed = Date.now() - startTime
-                  if elapsed > 2000
-                    puts "set hello speed: " + parseInt(times*1000 / elapsed) + "/s"
-                    puts "close the socket"
-                    @close()
-                  else
-                    do_benchmark()
-            do_benchmark()
+  client.error ->
+    puts "ERROR"
+    close()
 
-          @writeUtf8 "get hello\r\n", =>
-            recvMemcachedData = =>
-              @readToken headerDelim, (n) =>
-                header = @buffer.readUtf8(n)
-                print "server: recv "+header
-                if header.match /^VALUE /
-                  [type, key, flags, length] = header.split " "
-                  length = parseInt(length)
-                  puts "client: #{key} has #{length} bytes value, recv the value"
-                  @readSize length, (n)=>
-                    puts "server: the value is #{@buffer.readUtf8(n)}"
-                    @readToken headerDelim, (n) =>
-                      @buffer.consume(n)
-                      recvMemcachedData()
-                else
-                  puts "client: END receved"
-                  puts "now benchmark the get speed in 2 seconds"
-                  benchmark_get()
-            recvMemcachedData()
+  times = 1e3
+  st = Date.now()
+  do storeOnce = ->
+    buffer = Buffer.pop()
+    buffer.writeUtf8 "set hello 0 3600 #{message.size()}\r\n"
+    buffer.writeBuffer message
+    buffer.writeUtf8 "\r\n"
+    client.writeBuffer buffer, ->
+      client.readToken buffer, headerDelim, (n) ->
+        --times
+        if times
+          Buffer.push buffer
+          storeOnce()
+        else
+          puts 1e3 * 1000 / (Date.now() - st) + "/s"
+          benchmarkGet()
+
+  benchmarkGet = ->
+    times = 1e3
+    st = Date.now()
+    do getOnce = ->
+      buffer = Buffer.pop()
+      buffer.writeUtf8 "get hello\r\n"
+      client.writeBuffer buffer, ->
+        client.readToken buffer, headerDelim, (n) ->
+          header = buffer.readUtf8(n)
+          [type, key, flags, length] = header.split " "
+          if type != 'VALUE'
+            return close()
+          length = parseInt(length)
+          client.readSize buffer, length, (n) ->
+            text = buffer.readUtf8(n)
+            text = text.replace /ul/g, ->
+              'aaa'
+            --times
+            if times
+              Buffer.push buffer
+              getOnce()
+            else
+              puts 1e3 * 1000 / (Date.now() - st) + "/s"
+              close()
+
+return

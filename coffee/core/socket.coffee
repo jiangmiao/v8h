@@ -1,3 +1,21 @@
+###
+Client:
+Socket.connect "119.75.217.56:80", (client)->
+  buffer = Buffer.pop()
+  close = ->
+    Buffer.push buffer
+    client.close()
+
+  client.error ->
+    puts System.getLastError()
+    close()
+
+  client.writeUtf8 "GET / HTTP/1.1\r\nHost: www.baidu.com\r\n\r\n", ->
+    client.readToken buffer, header_delim, (n)->
+      puts buffer.readUtf8(n)
+      client.close()
+
+###
 i = Internal.Socket
 v8h.extend i,
   createTcp: ->
@@ -8,20 +26,36 @@ v8h.extend i,
 
   accept: (family, fd) ->
     switch family
-      when 'tcp' then @acceptTcp fd
-      when 'unix' then @acceptUnix fd
+      when i.PF_TCP 
+        @acceptTcp fd
+      when i.PF_UNIX 
+        @acceptUnix fd
 
 class Socket
   constructor: (@fd, @family, @address, @port) ->
+    @events = {}
 
   listen: (backlog) ->
     i.listen @fd, backlog
 
-  accept: (callback)->
+  accept: (callback) ->
     $in @fd, =>
       [fd, address, port] = i.accept @family, @fd
       client = new Socket(fd, @family, address, port)
       callback.call this, client
+
+  connect: (family, address, port, callback) ->
+    $error @fd, =>
+      callback.call @, null
+
+    $out @fd, =>
+      callback.call @, @
+
+    switch family
+      when i.PF_TCP
+        i.connectTcp @fd, address, port
+      when i.PF_UNIX
+        i.connectUnix @fd, address
 
   toString: ->
     "fd: #{@fd} family: #{@family} address: #{@address} port: #{@port}"
@@ -32,8 +66,15 @@ class Socket
 
   close: ->
     $del @fd
+    i.shutdown @fd, i.SHUT_RDWR
     i.close @fd
 
+  emit: (event) ->
+    if events[event]?
+      events[event].call @
+
+  on: (event, callback) ->
+    events[event] = callback
 
   # Reader
   # ======
@@ -44,6 +85,7 @@ class Socket
       if n == -1
         $triggerError(@fd)
       else if n == 0 #closed by client
+        # @emit "closed"
         $triggerError(@fd)
       else
         callback() if condition()
@@ -103,8 +145,13 @@ class Socket
   # ==============
   @parse: (address_str) ->
     address = address_str.split ':'
-    if address[0] != 'unix' and address[0] != 'tcp'
-      address.unshift 'tcp'
+    switch address[0]
+      when 'unix'
+        address[0] = i.PF_UNIX
+      when 'tcp'
+        address[0] = i.PF_TCP
+      else
+        address.unshift Socket.TCP
     if address.length < 3
       address[2] = 0
     address
@@ -121,15 +168,39 @@ class Socket
 
     [family, address, port] = @parse(address)
     switch family
-      when 'tcp'
+      when i.PF_TCP
         fd = i.createTcp()
-        i.bindTcp(fd, address, port)
-      when 'unix'
+        if i.bindTcp(fd, address, port) == -1
+          System.raiseSystem "bind address #{address}:#{port} failed"
+      when i.PF_UNIX
         fd = i.createUnix()
-        i.bindUnix(fd, address)
+        if i.bindUnix(fd, address) == -1
+          System.raiseSystem "bind unix socket #{address} failed"
+      else
+        System.raiseSystem "unsupported protocol"
+
     server = new Socket(fd, family, address, port)
     server.listen backlog
     server.accept callback
+
+  # connect address, [options,] callback
+  @connect: ->
+    args     = Array::slice.call arguments, 0
+    address  = args.shift()
+    callback = args.pop()
+    options  = args[0] ? {}
+
+    [family, address, port] = @parse(address)
+    switch family
+      when i.PF_TCP
+        fd = i.createTcp()
+        System.raise "create tcp" if fd == -1
+      when i.PF_UNIX
+        fd = i.createUnix()
+        System.raise "create unix" if fd == -1
+    server = new Socket(fd, family, "", 0)
+    server.connect family, address, port, callback
+
 
 global.Socket = Socket
 

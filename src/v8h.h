@@ -121,6 +121,10 @@
 
 // Ensure
 // ======
+#define V8H_ASSERT(expression) \
+	if (!(expression)) \
+		return THROW_EXCEPTION(#expression);
+
 #define V8H_ENSURE(expression) \
 	if (!(expression)) \
 		return THROW_EXCEPTION(#expression);
