@@ -1,0 +1,6 @@
+#global.debug = true
+text = "hello world"
+http = require('./../modules/net/http.js')
+c = http.Server.create! '127.0.0.1:9090'
+c.echo text
+c.end()

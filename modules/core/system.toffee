@@ -1,4 +1,4 @@
-v8h.extend System,
+v8h.extends System,
   raise: (message)->
     throw new Error(message)
 

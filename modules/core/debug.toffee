@@ -1,0 +1,31 @@
+objectId = 0
+class Debug
+  @wrap: (klass) ->
+    st = Date.now()
+    rt = ->
+      st = Date.now()
+      @objectId = ++objectId
+      puts "#{@objectId} New  #{rt.className}"
+      klass.apply this, arguments
+      this
+
+    inherit = (dest, src) ->
+      for k,v of src
+        if v instanceof Function
+          do (k) ->
+            dest[k] = ->
+              now = Date.now()
+              if @objectId?
+                puts "#{@objectId} #{rt.className}.#{k} #{now-st}"
+              else
+                puts "#{rt.className}.#{k} #{now-st}"
+              st = now
+              src[k].apply this, arguments
+        else
+          dest[k] = src[k]
+
+    inherit rt.prototype, klass.prototype
+    inherit rt, klass
+    rt
+
+global.Debug = Debug

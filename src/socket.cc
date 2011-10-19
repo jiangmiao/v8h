@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
 #include <fcntl.h>
 
 #include "v8h.h"
@@ -40,6 +41,19 @@ V8H_FUNCTION(Socket::socket)
 	if (fd > 0)
 		setNonblock(fd);
 	return V8_INT(fd);
+}
+V8H_FUNCTION(Socket::setopt)
+{
+	auto fd      = TO_INT(args[0]);
+	auto optname = TO_INT(args[1]);
+	auto js_value   = args[2];
+	if(js_value->IsInt32()) {
+		auto value = TO_INT(js_value);
+		auto result = setsockopt(fd, SOL_SOCKET, optname, &value, sizeof(value));
+		return V8_INT(result);
+	} else {
+		return THROW_EXCEPTION("unsupport setopt value");
+	}
 }
 V8H_C_1_1(Socket, close, TO_INT, V8_INT);
 V8H_C_2_1(Socket, shutdown, TO_INT, TO_INT, V8_INT);
@@ -122,7 +136,7 @@ V8H_FUNCTION(Socket::writeBuffer)
 	int  fd          = TO_INT(args[0]);
 	auto buffer      = Buffer::getInternal(args[1]);
 
-	int n = ::send(fd, buffer->data(), buffer->size(), 0);
+	int n = ::send(fd, buffer->data(), buffer->size(), MSG_NOSIGNAL);
 	if (n > 0)
 		buffer->consume(n);
 	return V8_INT(n);
@@ -157,6 +171,7 @@ v8::Handle<v8::Value> Socket::create()
 	V8H_CREATE_OBJECT_START();
 
 	V8H_STATIC_IMPLEMENT(socket);
+	V8H_STATIC_IMPLEMENT(setopt);
 	V8H_STATIC_IMPLEMENT(close);
 	V8H_STATIC_IMPLEMENT(shutdown);
 	V8H_STATIC_IMPLEMENT(listen);
@@ -180,6 +195,8 @@ v8::Handle<v8::Value> Socket::create()
 	V8H_CONSTANT_INT(SHUT_RD);
 	V8H_CONSTANT_INT(SHUT_WR);
 	V8H_CONSTANT_INT(SHUT_RDWR);
+
+	V8H_CONSTANT_INT(SO_REUSEADDR);
 
 	V8H_CREATE_END();
 }

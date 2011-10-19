@@ -1,6 +1,6 @@
 exports.hello = 'hello'
 class v8h
-  @extend = ->
+  @extends = ->
     args = Array::slice.call arguments, 0
     dest = args.shift()
     for ob in args

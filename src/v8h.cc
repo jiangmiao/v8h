@@ -10,7 +10,7 @@ using namespace v8;
 V8H_FUNCTION(puts)
 {
 	for (int i=0; i<args.Length(); ++i) {
-		v8::String::Utf8Value data(args[0]);
+		v8::String::Utf8Value data(args[i]);
 		fwrite(*data, 1, data.length(), stdout);
 		fwrite("\n", 1, 1, stdout);
 	}
@@ -21,9 +21,10 @@ V8H_FUNCTION(puts)
 V8H_FUNCTION(print)
 {
 	for (int i=0; i<args.Length(); ++i) {
-		v8::String::Utf8Value data(args[0]);
+		v8::String::Utf8Value data(args[i]);
 		fwrite(*data, 1, data.length(), stdout);
-		fwrite(" ", 1, 1, stdout);
+		if(i+1<args.Length())
+			fwrite(" ", 1, 1, stdout);
 	}
 	return v8::Undefined();
 }

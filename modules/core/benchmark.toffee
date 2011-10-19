@@ -11,7 +11,8 @@ exports.benchmark = ->
     evaluate = true
     while !done
       st = Date.now()
-      callback(times)
+      for i in [1..times]
+        callback.call @
       ed = Date.now()
       time = ed - st
       break unless evaluate

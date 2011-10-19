@@ -33,14 +33,20 @@ class BufferPool
 
 global.$bufferPool = new BufferPool(100)
 
-v8h.extend Buffer,
+v8h.extends Buffer,
   isFound: (last, delim_buffer_size) ->
     # assert delim_buffer_size > 0 so ignore @size() == 0 && delim_buffer_size == 0
     last + delim_buffer_size <= @size()
 
-v8h.extend Buffer,
+v8h.extends Buffer,
   pop: ->
     $bufferPool.pop()
+
+  create: (text)->
+    buffer = $bufferPool.pop()
+    if text?
+      buffer.writeUtf8(text)
+    buffer
 
   push: (buffer)->
     buffer.isTemp = null
@@ -68,3 +74,5 @@ Buffer::clone = ->
   dest.writeBuffer @
   dest
 
+Buffer::close = ->
+  Buffer.push @

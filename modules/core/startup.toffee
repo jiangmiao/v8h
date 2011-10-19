@@ -36,6 +36,7 @@ do ->
   require './buffer.js'
   require './service.js'
   require './socket.js'
+  require './debug.js'
 
   if ARGV[1]?
     script = ARGV[1].toString()

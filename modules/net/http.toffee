@@ -1,0 +1,192 @@
+httpDelim = new Buffer("\r\n\r\n")
+parseCookie = (cookieString) ->
+  puts cookieString
+
+parseContext = (contextString) ->
+  puts contextString
+
+class Header
+  # @method
+  # @contentType
+  # @contentLength
+  # @boundary
+  constructor: (@headerString) ->
+    fields = @headerString.split "\r\n"
+    @method = fields.shift().split(' ', 2)[0].toUpperCase()
+
+    @fields = {}
+    for field in fields
+      next unless field?
+      [field, value] = field.split ': ', 2
+      @fields[field.toLowerCase()] = value
+
+    @lower 'content-type', 'connection'
+
+    if @method is :POST
+      if @fields[:content-length]?
+        @contentType    = :content-length
+        @contentLength = parseInt(@fields[:content-length])
+
+      if @fields[:content-type]? and @fields[:content-type].indexOf('multipart') isnt -1
+        @contentType = :multipart
+
+    if @fields[:connection]? and @fields[:connection] is 'keep-alive'
+      @keepAlive = true
+    else
+      @keepAlive = false
+
+    @
+
+  lower: (fields) ->
+    for field in fields when @fields[field]?
+      @fields[field] = @fields[field].toLowerCase()
+    @
+
+  bool: (field, value) ->
+    if @fields[field]? and @fields[field] is value
+      @fields[field] = true
+    else
+      @fields[field] = false
+
+  toString: ->
+    @headerString
+
+  get: (field) ->
+    @fields[field]
+
+
+class Server
+  @create: (@address, callback) ->
+    client = Socket.createServer! @address
+    client = new Client(client, callback)
+    client.run()
+
+  @className: :Server
+
+class Client
+  # @header : Object
+  # @buffer : Buffer
+
+  # _SERVER
+  # _GET
+  # _POST
+  # _REQUEST
+  # _FILES
+  # _COOKIE
+
+  # @body   : String
+  # @header : Object
+
+  constructor: (@client, @process) ->
+    @buffer = Buffer.create()
+    @header = {}
+
+    @_GET     = {}
+    @_POST    = {}
+    @_REQUEST = {}
+    @_FILES   = {}
+    @_SERVER  = {}
+    @_COOKIE  = {}
+
+    @st = Date.now()
+
+    @client.error =>
+      @close()
+
+  raise: (message) ->
+    puts message
+    @close()
+
+  close: ->
+    if @boundary?
+      @boundary.close()
+    @buffer.close()
+    @client.close()
+
+  run: ->
+    @recvHeader()
+      
+  recvHeader: ->
+    n = @client.readToken! @buffer, httpDelim
+    @header = new Header(@buffer.readUtf8(n))
+    if @header.cookie?
+      @cookie = parseCookie(@header.cookie)
+
+    switch @header.method
+      when :GET
+        @recvFinish()
+      when :POST
+        @recvPost()
+      else
+        @raise('invalid request method ' + @header.method)
+
+  recvPost: ->
+    switch @header.contentType
+      when :content-length
+        @recvContentLength()
+      when :multipart
+        @recvMultiPart()
+      else
+        @raise('invalid request postMethod')
+
+  recvContentLength: ->
+    length = @header.get('content-length')
+    n = @client.readSize! @buffer, length
+    @_POST = parseContext(@buffer.readUtf8(n))
+    @recvFinish()
+
+  recvMultiPart: ->
+    type = @header.get('content-type')
+    unless type =~ /boundary=(.*)/
+      @raise('cannot find boundary=')
+
+    @boundary = Buffer.create()
+    @boundary.writeUtf8('--' + \1)
+
+    length = @header.get 'content-length'
+    n      = @client.readSize! @buffer, length
+    @buffer.consume(n)
+    @recvFinish()
+
+  recvFinish: ->
+    if @buffer.size() 
+      @keepAlive = false
+    @body = ''
+    @process.call @, @
+
+  sendHeader: ->
+    @client.writeUtf8!("HTTP/1.1 200 OK\r\nContent-Type: text/html;charset=utf8\r\nConnection: close\r\n\r\n");
+    @sendBody()
+
+  sendBody: ->
+    @buffer.writeUtf8 @body
+    n = @client.writeBuffer! @buffer
+    @buffer.consume(n)
+    @sendFinish()
+    ###
+    @client.writeUtf8!(@header + @buffer.size() + "\n" + @buffer.readUtf8() + """ 
+    <form method="post" enctype="multipart/form-data">
+    <input type="file" name="file" />
+    <input type="submit" />
+    </form>
+    """)
+    ###
+
+  sendFinish: ->
+    @close()
+
+  end: ->
+    @sendHeader()
+
+  echo: (text)->
+    @body += text
+
+
+  @className: :Client
+
+if global.debug? and global.debug
+  Client = Debug.wrap(Client)
+  Server = Debug.wrap(Server)
+
+v8h.extends exports,
+  Server: Server

@@ -3,15 +3,15 @@
 
 if [ "$1" == "" ]; then
   watch=''
-  cmd='cb'
+  cmd='c'
 else
   watch='&'
-  cmd='cwb'
+  cmd='cw'
 fi
 
 for name in modules/core modules/net benchmark examples test
 do
-  eval coffee -$cmd -o $name $name/*.coffee $watch
+  eval toffee -$cmd -o $name $name/*.toffee $watch
 done
 
 if [ "$1" != "" ]; then

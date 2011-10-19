@@ -55,6 +55,7 @@ void System::reportException(v8::TryCatch* try_catch)
 			printf("%s\n", stack_trace_string);
 		}
 	}
+	exit(1);
 }
 
 V8H_FUNCTION(System::startup)
@@ -106,10 +107,11 @@ V8H_FUNCTION(System::absoluteRequire)
 	auto exports     = v8::Object::New();
 	SET(global, "exports", exports);
 	script->Run();
+	auto result = GET(global, "exports");
 	SET(global, "exports", old_exports);
 	System::reportException(&trycatch);
 	SET(global, "requireDir", oldDir);
-	return exports;
+	return result;
 }
 
 V8H_FUNCTION(System::getBinDir)

@@ -38,7 +38,7 @@ $runJS = ->
 
   @
 
-v8h.extend global,
+v8h.extends global,
   $in           : $in
   $out          : $out
   $del          : $del

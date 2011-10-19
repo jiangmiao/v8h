@@ -1,5 +1,5 @@
 i = Internal.Socket
-v8h.extend i,
+v8h.extends i,
   createTcp: ->
     @socket(@PF_INET, @SOCK_STREAM, 0)
 
@@ -157,6 +157,7 @@ class Socket
     switch family
       when i.PF_INET
         fd = i.createTcp()
+        i.setopt fd, i.SO_REUSEADDR, 1
         if i.bindTcp(fd, address, port) == -1
           System.raiseSystem "bind address #{address}:#{port} failed"
       when i.PF_UNIX

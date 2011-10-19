@@ -102,9 +102,8 @@
       port     : Int32
       callback : Function(client: Socket)
 
-    listen
+    listen -> result : Boolean
       backlog : Int32
-      -> result : Boolean
 
     close
 
